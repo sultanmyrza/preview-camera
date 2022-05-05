@@ -55,8 +55,8 @@ class PreviewCamera(private val bridge: Bridge) {
                 bridge.activity.windowManager.defaultDisplay.getMetrics(displayMetrics)
 
                 previewLayerWrapper!!.layoutParams = FrameLayout.LayoutParams(
-                    displayMetrics.widthPixels,
-                    displayMetrics.heightPixels
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT,
                 )
             }
 
