@@ -223,4 +223,5 @@ public class PreviewCameraPlugin: CAPPlugin {
         settings.shouldCorrectOrientation = call.getBool("correctOrientation", true)
         return settings
     }
+    
 }
