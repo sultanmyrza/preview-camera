@@ -3,31 +3,24 @@ package io.numbersprotocol.capturelite.plugins.previewcamera
 import android.Manifest
 import android.content.ContentValues
 import android.content.Context
+import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
-import android.graphics.Color
 
-import android.graphics.drawable.ColorDrawable
 import android.hardware.camera2.*
 import android.hardware.display.DisplayManager
 import android.media.Image
-import android.media.MediaScannerConnection
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
 import android.view.*
-import android.webkit.MimeTypeMap
-import android.widget.Toast
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.video.*
-import androidx.camera.video.R
 import androidx.camera.video.Recorder
 import androidx.camera.video.VideoCapture
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.net.toFile
 import androidx.fragment.app.Fragment
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.window.WindowManager
@@ -78,6 +71,8 @@ class PreviewCameraFragment : Fragment() {
     private var cameraProvider: ProcessCameraProvider? = null
     private lateinit var windowManager: WindowManager
 
+    private var currentDisplayOrientation = 0;
+
     private val displayManager by lazy {
         requireContext().getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
     }
@@ -98,6 +93,11 @@ class PreviewCameraFragment : Fragment() {
                 Log.d(TAG, "Rotation changed: ${view.display.rotation}")
                 imageCapture?.targetRotation = view.display.rotation
                 // imageAnalyzer?.targetRotation = view.display.rotation
+
+                if (view.display.rotation != currentDisplayOrientation) {
+                    currentDisplayOrientation = view.display.rotation
+                    bindCameraUseCases();
+                }
             }
         } ?: Unit
     }
@@ -135,6 +135,8 @@ class PreviewCameraFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR
+
         arguments?.let {
             cameraId = it.getString(ARG_PARAM1)
             pixelFormat = it.getInt(ARG_PARAM2)
@@ -431,9 +433,9 @@ class PreviewCameraFragment : Fragment() {
         // Preview
         preview = Preview.Builder()
             // We request aspect ratio but no resolution
-            // .setTargetAspectRatio(screenAspectRatio)
+            .setTargetAspectRatio(screenAspectRatio)
             // Set initial target rotation
-            // .setTargetRotation(rotation)
+            .setTargetRotation(rotation)
             .build()
             .also { it.setSurfaceProvider(fragmentCameraBinding.viewFinder.surfaceProvider) }
 
@@ -442,10 +444,10 @@ class PreviewCameraFragment : Fragment() {
             // .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
             // We request aspect ratio but no resolution to match preview config, but letting
             // CameraX optimize for whatever specific resolution best fits our use cases
-            // .setTargetAspectRatio(screenAspectRatio)
+            .setTargetAspectRatio(screenAspectRatio)
             // Set initial target rotation, we will have to call this again if rotation changes
             // during the lifecycle of this use case
-            // .setTargetRotation(rotation)
+            .setTargetRotation(rotation)
             .build()
 
         // VideoRecorder
@@ -625,6 +627,9 @@ class PreviewCameraFragment : Fragment() {
 
 
     override fun onDestroy() {
+
+        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+
         _fragmentCameraBinding = null
         super.onDestroy()
         // Shut down our background executor

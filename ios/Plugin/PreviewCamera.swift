@@ -78,6 +78,11 @@ typealias CapacitorNotifyListeners = (_ eventName: String, _ data: [String : Any
             throw PreviewCameraError.previewNotStarted
         }
         
+        // Update the orientation before taking photo.
+        if let photoOutputConnection = photoOutput.connection(with: .video){
+            photoOutputConnection.videoOrientation = videoOrientation()
+        }
+        
         photoOutput.capturePhoto(with: AVCapturePhotoSettings(), delegate: self)
     }
 
@@ -105,6 +110,10 @@ typealias CapacitorNotifyListeners = (_ eventName: String, _ data: [String : Any
         if cameraRecordStarted == true {
             throw PreviewCameraError.recordAlreadyStarted
         }
+        
+        // Update the orientation on the movie file output video connection before recording.
+        let movieFileOutputConnection = movieFileOutput.connection(with: .video)
+        movieFileOutputConnection?.videoOrientation = self.videoOrientation()
         
         session.startRunning()
         
@@ -426,4 +435,51 @@ typealias CapacitorNotifyListeners = (_ eventName: String, _ data: [String : Any
         
         notifyListeners("captureVideoFinished", ["filePath": filePath?.absoluteString, "errorMessage": errorMessage])
     }
+    
+    
+    // MARK: - Utility functions
+    
+    private func videoOrientation() -> AVCaptureVideoOrientation {
+            
+            var videoOrientation: AVCaptureVideoOrientation!
+            
+            let orientation: UIDeviceOrientation = UIDevice.current.orientation
+            
+            switch orientation {
+                
+            case .faceUp, .faceDown, .unknown:
+                
+                // let interfaceOrientation = UIApplication.shared.statusBarOrientation
+                
+                if #available(iOS 13.0, *) {
+                    if let interfaceOrientation = UIApplication.shared.windows.first(where: { $0.isKeyWindow })?.windowScene?.interfaceOrientation {
+                        
+                        switch interfaceOrientation {
+                            
+                        case .portrait, .portraitUpsideDown, .unknown:
+                            videoOrientation = .portrait
+                        case .landscapeLeft:
+                            videoOrientation = .landscapeRight
+                        case .landscapeRight:
+                            videoOrientation = .landscapeLeft
+                        @unknown default:
+                            videoOrientation = .portrait
+                        }
+                    }
+                } else {
+                    // Fallback on earlier versions
+                }
+                
+            case .portrait, .portraitUpsideDown:
+                videoOrientation = .portrait
+            case .landscapeLeft:
+                videoOrientation = .landscapeRight
+            case .landscapeRight:
+                videoOrientation = .landscapeLeft
+            @unknown default:
+                videoOrientation = .portrait
+            }
+            
+            return videoOrientation
+        }
 }
