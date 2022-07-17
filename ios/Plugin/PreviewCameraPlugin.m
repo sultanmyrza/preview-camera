@@ -13,5 +13,7 @@ CAP_PLUGIN(PreviewCameraPlugin, "PreviewCamera",
            CAP_PLUGIN_METHOD(flipCamera, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(getFlashModes, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(setFlashModes, CAPPluginReturnPromise);
+           CAP_PLUGIN_METHOD(isTorchOn, CAPPluginReturnPromise);
+           CAP_PLUGIN_METHOD(enableTorch, CAPPluginReturnPromise);
            
 )

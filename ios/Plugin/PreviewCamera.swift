@@ -31,6 +31,8 @@ typealias CapacitorNotifyListeners = (_ eventName: String, _ data: [String : Any
     let PHOTO_EXTENSION = "jpeg"
     let VIDEO_EXTENSION = "mp4"
     var outputDirectory = FileManager.default.urls(for: .applicationDirectory, in: .userDomainMask)[0]
+    
+    var torchMode = AVCaptureDevice.TorchMode.off
 
     init(webView: UIView, parentView: UIView, settings: CameraSettings, notifyListeners:  @escaping CapacitorNotifyListeners) {
         self.webView = webView
@@ -83,6 +85,16 @@ typealias CapacitorNotifyListeners = (_ eventName: String, _ data: [String : Any
             photoOutputConnection.videoOrientation = videoOrientation()
         }
         
+        if self.torchMode == .on {
+            do {
+                try self.videoDeviceInput.device.lockForConfiguration()
+                self.videoDeviceInput.device.torchMode = .on
+                self.videoDeviceInput.device.unlockForConfiguration()
+            } catch {
+                print("Failed to set torch for photo")
+            }
+        }
+        
         photoOutput.capturePhoto(with: AVCapturePhotoSettings(), delegate: self)
     }
 
@@ -118,6 +130,16 @@ typealias CapacitorNotifyListeners = (_ eventName: String, _ data: [String : Any
         session.startRunning()
         
         let filePath = createFile(FILENAME_FORMAT, VIDEO_EXTENSION)
+        
+        if self.torchMode == .on {
+            do {
+                try self.videoDeviceInput.device.lockForConfiguration()
+                self.videoDeviceInput.device.torchMode = .on
+                self.videoDeviceInput.device.unlockForConfiguration()
+            } catch {
+                print("Failed to set torch for video")
+            }
+        }
         
         movieFileOutput.startRecording(to: filePath, recordingDelegate: self)
         
@@ -221,6 +243,19 @@ typealias CapacitorNotifyListeners = (_ eventName: String, _ data: [String : Any
         }
         // TODO: implement method
     }
+    
+    public func isTorchOn()  -> Bool {
+        return self.torchMode == .on
+    }
+    
+    public func enableTorch(enable: Bool) {
+        if enable == true {
+            self.torchMode = .on
+        } else {
+            self.torchMode = .off
+        }
+    }
+    
 
     // MARK: - PreviewCamera helper methods
     private func showCameraPreview() {

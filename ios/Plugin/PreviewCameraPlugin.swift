@@ -199,6 +199,20 @@ public class PreviewCameraPlugin: CAPPlugin {
             call.resolve()
         } catch let error as PreviewCameraError { call.reject(error.message) } catch { call.reject("Unknow error setFlashModes")}
     }
+    
+    @objc func isTorchOn(_ call: CAPPluginCall){
+        let result = self.previewCamera?.isTorchOn()
+        call.resolve([
+            "result": result
+        ])
+    }
+    
+    @objc public func enableTorch(_ call: CAPPluginCall) {
+        print("enable = \(call.getBool("enable"))")
+        let value = call.getBool("enable") ?? false
+        self.previewCamera?.enableTorch(enable: value)
+        call.resolve()
+    }
 
     // MARK: - Helper methods
     func checkUsageDescriptions() -> String? {
