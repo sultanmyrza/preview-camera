@@ -33,4 +33,10 @@ export class PreviewCameraWeb extends WebPlugin implements PreviewCameraPlugin {
   setFlashMode(): Promise<void> {
     throw new Error('Method not implemented.');
   }
+  isTorchOn(): Promise<{ result: boolean; }> {
+    throw new Error('Method not implemented.');
+  }
+  enableTorch(_: { enable: boolean }): Promise<void> {
+    throw new Error('Method not implemented.');
+  }
 }
