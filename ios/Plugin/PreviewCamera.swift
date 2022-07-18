@@ -79,7 +79,7 @@ typealias CapacitorNotifyListeners = (_ eventName: String, _ data: [String : Any
         if cameraPreviewStarted == false {
             throw PreviewCameraError.previewNotStarted
         }
-        
+
         // Update the orientation before taking photo.
         if let photoOutputConnection = photoOutput.connection(with: .video){
             photoOutputConnection.videoOrientation = videoOrientation()
@@ -89,13 +89,18 @@ typealias CapacitorNotifyListeners = (_ eventName: String, _ data: [String : Any
             do {
                 try self.videoDeviceInput.device.lockForConfiguration()
                 self.videoDeviceInput.device.torchMode = .on
+                
                 self.videoDeviceInput.device.unlockForConfiguration()
             } catch {
                 print("Failed to set torch for photo")
             }
         }
-        
-        photoOutput.capturePhoto(with: AVCapturePhotoSettings(), delegate: self)
+        let photoSettings = AVCapturePhotoSettings()
+        photoSettings.isHighResolutionPhotoEnabled = true
+        if #available(iOS 13.0, *) {
+            photoSettings.photoQualityPrioritization = .quality
+        }
+        photoOutput.capturePhoto(with: photoSettings, delegate: self)
     }
 
     // AVCapturePhotoCaptureDelegate method for AVCapturePhotoOutput.capturePhoto
@@ -210,6 +215,8 @@ typealias CapacitorNotifyListeners = (_ eventName: String, _ data: [String : Any
                 
                 self.session.beginConfiguration()
                 
+                self.session.sessionPreset = .high
+                
                 self.session.removeInput(self.videoDeviceInput)
                 
                 if self.session.canAddInput(videoDeviceInput) {
@@ -223,6 +230,21 @@ typealias CapacitorNotifyListeners = (_ eventName: String, _ data: [String : Any
                 self.session.removeOutput(self.movieFileOutput)
                 if self.session.canAddOutput(movieFileOutput) {
                     self.session.addOutput(movieFileOutput)
+                    
+                    do {
+                        try self.videoDeviceInput.device.lockForConfiguration()
+                        for format in self.videoDeviceInput.device.formats {
+                            if #available(iOS 15.0, *) {
+                                if format.isHighPhotoQualitySupported {
+                                    self.videoDeviceInput.device.activeFormat = format
+                                    break
+                                }
+                            }
+                        }
+                        self.videoDeviceInput.device.unlockForConfiguration()
+                    } catch {
+                        print("Could not lock device for configuration: \(error)")
+                    }
                 }
                 
                 previewLayer.videoGravity = .resizeAspectFill
@@ -377,6 +399,11 @@ typealias CapacitorNotifyListeners = (_ eventName: String, _ data: [String : Any
             
             if session.canAddOutput(photoOutput) {
                 session.addOutput(photoOutput)
+                
+                photoOutput.isHighResolutionCaptureEnabled = true
+                if #available(iOS 13.0, *) {
+                    photoOutput.maxPhotoQualityPrioritization = .quality
+                }
             }
             
             if session.canAddOutput(movieFileOutput) {
