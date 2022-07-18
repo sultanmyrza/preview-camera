@@ -458,6 +458,7 @@ class PreviewCameraFragment : Fragment() {
             // Set initial target rotation, we will have to call this again if rotation changes
             // during the lifecycle of this use case
             .setTargetRotation(rotation)
+            .setJpegQuality(100)
             .setFlashMode(flashMode)
             .build()
 
