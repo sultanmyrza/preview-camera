@@ -12,12 +12,13 @@ import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import androidx.camera.core.ImageCapture
 import com.getcapacitor.Bridge
 import com.getcapacitor.JSObject
 import com.getcapacitor.PluginCall
 
 
-typealias CapacitorNotifyListener =  (String, JSObject) -> Unit
+typealias CapacitorNotifyListener = (String, JSObject) -> Unit
 
 class PreviewCamera(private val bridge: Bridge) {
 
@@ -25,6 +26,8 @@ class PreviewCamera(private val bridge: Bridge) {
     private var cameraRecordStarted: Boolean = false
     private var previewWrapperFrameId = View.generateViewId()
     private var previewLayerWrapper: FrameLayout? = null
+    private var flashEnabled = false
+
 
     //  private var previewLayer: BlankFragment? = null
     private var previewCameraFragment: PreviewCameraFragment? = null
@@ -32,6 +35,17 @@ class PreviewCamera(private val bridge: Bridge) {
     fun echo(value: String): String {
         Log.i("Echo", value)
         return value
+    }
+
+    fun isTorchOn(): Boolean {
+        return previewCameraFragment?.flashMode == ImageCapture.FLASH_MODE_ON
+    }
+
+    fun enableTorch(enable: Boolean) {
+        bridge.activity.runOnUiThread {
+            previewCameraFragment?.enableTorch(enable)
+            flashEnabled = enable
+        }
     }
 
     fun startPreview(call: PluginCall) {
@@ -66,7 +80,8 @@ class PreviewCamera(private val bridge: Bridge) {
 
             val fragmentManger = bridge.activity.supportFragmentManager
             val fragmentTransaction = fragmentManger.beginTransaction()
-            previewCameraFragment = PreviewCameraFragment.newInstance(cameraId, format)
+            previewCameraFragment =
+                PreviewCameraFragment.newInstance(cameraId, format, flashEnabled)
 
             fragmentTransaction.add(previewLayerWrapper!!.id, previewCameraFragment!!)
             fragmentTransaction.commit()
