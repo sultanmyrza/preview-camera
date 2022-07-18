@@ -23,6 +23,8 @@ npx cap sync
 * [`flipCamera()`](#flipcamera)
 * [`getFlashModes()`](#getflashmodes)
 * [`setFlashMode()`](#setflashmode)
+* [`isTorchOn()`](#istorchon)
+* [`enableTorch(...)`](#enabletorch)
 * [`addListener('captureVideoFinished', ...)`](#addlistenercapturevideofinished)
 * [`addListener('capturePhotoFinished', ...)`](#addlistenercapturephotofinished)
 * [Interfaces](#interfaces)
@@ -126,6 +128,30 @@ getFlashModes() => Promise<any>
 ```typescript
 setFlashMode() => Promise<void>
 ```
+
+--------------------
+
+
+### isTorchOn()
+
+```typescript
+isTorchOn() => Promise<{ result: boolean; }>
+```
+
+**Returns:** <code>Promise&lt;{ result: boolean; }&gt;</code>
+
+--------------------
+
+
+### enableTorch(...)
+
+```typescript
+enableTorch(options: { enable: boolean; }) => Promise<void>
+```
+
+| Param         | Type                              |
+| ------------- | --------------------------------- |
+| **`options`** | <code>{ enable: boolean; }</code> |
 
 --------------------
 

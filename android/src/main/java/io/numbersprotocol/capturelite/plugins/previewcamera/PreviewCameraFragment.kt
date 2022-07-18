@@ -41,6 +41,7 @@ import kotlin.math.min
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
+private const val ARG_PARAM3 = "param3"
 
 /** Milliseconds used for UI animations */
 const val ANIMATION_FAST_MILLIS = 50L
@@ -72,6 +73,8 @@ class PreviewCameraFragment : Fragment() {
     private lateinit var windowManager: WindowManager
 
     private var currentDisplayOrientation = 0;
+
+    var flashMode = ImageCapture.FLASH_MODE_OFF
 
     private val displayManager by lazy {
         requireContext().getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
@@ -140,6 +143,13 @@ class PreviewCameraFragment : Fragment() {
         arguments?.let {
             cameraId = it.getString(ARG_PARAM1)
             pixelFormat = it.getInt(ARG_PARAM2)
+
+            val flashEnabled = it.getBoolean(ARG_PARAM3)
+            flashMode = if (flashEnabled) {
+                ImageCapture.FLASH_MODE_ON
+            } else {
+                ImageCapture.FLASH_MODE_OFF
+            }
         }
     }
 
@@ -448,6 +458,7 @@ class PreviewCameraFragment : Fragment() {
             // Set initial target rotation, we will have to call this again if rotation changes
             // during the lifecycle of this use case
             .setTargetRotation(rotation)
+            .setFlashMode(flashMode)
             .build()
 
         // VideoRecorder
@@ -461,6 +472,7 @@ class PreviewCameraFragment : Fragment() {
 
 
 
+
         try {
             // Must unbind the use-cases before rebinding them
             cameraProvider.unbindAll()
@@ -470,6 +482,11 @@ class PreviewCameraFragment : Fragment() {
             camera = cameraProvider.bindToLifecycle(
                 viewLifecycleOwner, cameraSelector, preview, imageCapture, videoCapture
             )
+
+            if (flashMode == ImageCapture.FLASH_MODE_ON)
+                camera?.cameraControl?.enableTorch(true)
+            if (flashMode == ImageCapture.FLASH_MODE_OFF)
+                camera?.cameraControl?.enableTorch(false)
 
             // Attach the viewfinder's surface provider to preview use case
             preview?.setSurfaceProvider(fragmentCameraBinding.viewFinder.surfaceProvider)
@@ -645,6 +662,15 @@ class PreviewCameraFragment : Fragment() {
         super.onDestroyView()
     }
 
+    fun enableTorch(enable: Boolean) {
+        if (enable) {
+            this.flashMode = ImageCapture.FLASH_MODE_ON
+        } else {
+            this.flashMode = ImageCapture.FLASH_MODE_OFF
+        }
+        this.bindCameraUseCases()
+    }
+
     companion object {
         private val TAG = PreviewCameraFragment::class.java.simpleName
 
@@ -699,11 +725,12 @@ class PreviewCameraFragment : Fragment() {
          */
         // TODO: Rename and change types and number of parameters
         @JvmStatic
-        fun newInstance(cameraId: String, pixelFormat: Int) =
+        fun newInstance(cameraId: String, pixelFormat: Int, flashEnabled: Boolean) =
             PreviewCameraFragment().apply {
                 arguments = Bundle().apply {
                     putString(ARG_PARAM1, cameraId)
                     putInt(ARG_PARAM2, pixelFormat)
+                    putBoolean(ARG_PARAM3, flashEnabled)
                 }
             }
     }

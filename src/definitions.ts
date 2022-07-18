@@ -18,6 +18,8 @@ export interface PreviewCameraPlugin {
   flipCamera(): Promise<void>;
   getFlashModes(): Promise<any>;
   setFlashMode(): Promise<void>;
+  isTorchOn(): Promise<{ result: boolean }>;
+  enableTorch(options: { enable: boolean }): Promise<void>;
   addListener(
     eventName: 'captureVideoFinished',
     listenerFunc: (data: CaptureResult) => void,
