@@ -288,7 +288,10 @@ typealias CapacitorNotifyListeners = (_ eventName: String, _ data: [String : Any
     }
     
     public func isTorchAvailable() -> Bool {
-        return self.videoDeviceInput.device.isTorchModeSupported(.on)
+        guard let videoDeviceInput = self.videoDeviceInput else {
+            return false
+        }
+        return videoDeviceInput.device.isTorchModeSupported(.on)
     }
     
 
