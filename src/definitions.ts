@@ -1,4 +1,4 @@
-import { PluginListenerHandle } from '@capacitor/core';
+import type { PluginListenerHandle } from '@capacitor/core';
 
 export interface CaptureResult {
   /** File path for photo or video taken by camera. Example: file://your-app-dir/.../my-video.mp4 */
@@ -20,6 +20,7 @@ export interface PreviewCameraPlugin {
   setFlashMode(): Promise<void>;
   isTorchOn(): Promise<{ result: boolean }>;
   enableTorch(options: { enable: boolean }): Promise<void>;
+  isTorchAvailable(): Promise<{ result: boolean }>;
   addListener(
     eventName: 'captureVideoFinished',
     listenerFunc: (data: CaptureResult) => void,

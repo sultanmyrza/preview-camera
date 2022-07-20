@@ -25,6 +25,7 @@ npx cap sync
 * [`setFlashMode()`](#setflashmode)
 * [`isTorchOn()`](#istorchon)
 * [`enableTorch(...)`](#enabletorch)
+* [`isTorchAvailable()`](#istorchavailable)
 * [`addListener('captureVideoFinished', ...)`](#addlistenercapturevideofinished)
 * [`addListener('capturePhotoFinished', ...)`](#addlistenercapturephotofinished)
 * [Interfaces](#interfaces)
@@ -152,6 +153,17 @@ enableTorch(options: { enable: boolean; }) => Promise<void>
 | Param         | Type                              |
 | ------------- | --------------------------------- |
 | **`options`** | <code>{ enable: boolean; }</code> |
+
+--------------------
+
+
+### isTorchAvailable()
+
+```typescript
+isTorchAvailable() => Promise<{ result: boolean; }>
+```
+
+**Returns:** <code>Promise&lt;{ result: boolean; }&gt;</code>
 
 --------------------
 
