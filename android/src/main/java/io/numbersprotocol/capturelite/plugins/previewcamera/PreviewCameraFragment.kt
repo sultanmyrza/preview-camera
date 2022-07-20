@@ -75,6 +75,7 @@ class PreviewCameraFragment : Fragment() {
     private var currentDisplayOrientation = 0;
 
     var flashMode = ImageCapture.FLASH_MODE_OFF
+    var flashModeAvailable = true;
 
     private val displayManager by lazy {
         requireContext().getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
@@ -210,6 +211,14 @@ class PreviewCameraFragment : Fragment() {
                 hasBackCamera() -> CameraSelector.LENS_FACING_BACK
                 hasFrontCamera() -> CameraSelector.LENS_FACING_FRONT
                 else -> throw IllegalStateException("Back and front camera are unavailable")
+            }
+
+            flashModeAvailable = CameraSelector.LENS_FACING_BACK == lensFacing
+
+            flashMode = if (flashModeAvailable && flashMode == ImageCapture.FLASH_MODE_ON) {
+                ImageCapture.FLASH_MODE_ON
+            } else {
+                ImageCapture.FLASH_MODE_OFF
             }
 
             // Enable or disable switching between cameras
@@ -392,6 +401,11 @@ class PreviewCameraFragment : Fragment() {
                     }
                 }
 
+            if (this.flashModeAvailable && flashMode == ImageCapture.FLASH_MODE_ON) {
+                camera?.cameraControl?.enableTorch(true)
+            } else {
+                camera?.cameraControl?.enableTorch(false)
+            }
         } catch (exc: IllegalStateException) {
             Log.d(TAG, exc.message ?: "IllegalStateException")
             call.reject("IllegalStateException", exc)
@@ -416,6 +430,15 @@ class PreviewCameraFragment : Fragment() {
         } else {
             CameraSelector.LENS_FACING_FRONT
         }
+
+        flashModeAvailable = lensFacing == CameraSelector.LENS_FACING_BACK
+
+        flashMode = if (flashModeAvailable && flashMode == ImageCapture.FLASH_MODE_ON) {
+            ImageCapture.FLASH_MODE_ON
+        } else {
+            ImageCapture.FLASH_MODE_OFF
+        }
+
         // Re-bind use cases to update selected camera
         bindCameraUseCases()
     }
@@ -451,6 +474,7 @@ class PreviewCameraFragment : Fragment() {
 
         // ImageCapture
         imageCapture = ImageCapture.Builder()
+            .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
             // .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
             // We request aspect ratio but no resolution to match preview config, but letting
             // CameraX optimize for whatever specific resolution best fits our use cases
@@ -471,9 +495,6 @@ class PreviewCameraFragment : Fragment() {
         ).build()
         videoCapture = VideoCapture.withOutput(recorder)
 
-
-
-
         try {
             // Must unbind the use-cases before rebinding them
             cameraProvider.unbindAll()
@@ -484,10 +505,10 @@ class PreviewCameraFragment : Fragment() {
                 viewLifecycleOwner, cameraSelector, preview, imageCapture, videoCapture
             )
 
-            if (flashMode == ImageCapture.FLASH_MODE_ON)
-                camera?.cameraControl?.enableTorch(true)
-            if (flashMode == ImageCapture.FLASH_MODE_OFF)
-                camera?.cameraControl?.enableTorch(false)
+//            if (flashMode == ImageCapture.FLASH_MODE_ON)
+//                camera?.cameraControl?.enableTorch(true)
+//            if (flashMode == ImageCapture.FLASH_MODE_OFF)
+//                camera?.cameraControl?.enableTorch(false)
 
             // Attach the viewfinder's surface provider to preview use case
             preview?.setSurfaceProvider(fragmentCameraBinding.viewFinder.surfaceProvider)
@@ -497,6 +518,12 @@ class PreviewCameraFragment : Fragment() {
         }
     }
 
+    fun isTorchAvailable(): Boolean {
+        return this.flashModeAvailable && CameraSelector.LENS_FACING_BACK == lensFacing
+//        if (lensFacing === CameraSelector.LENS_FACING_BACK) return true
+//        return false
+//        return camera?.cameraInfo?.hasFlashUnit() ?: false
+    }
 
     /** Returns true if the device has an available back camera. False otherwise */
     private fun hasBackCamera(): Boolean {
@@ -664,7 +691,7 @@ class PreviewCameraFragment : Fragment() {
     }
 
     fun enableTorch(enable: Boolean) {
-        if (enable) {
+        if (enable && flashModeAvailable) {
             this.flashMode = ImageCapture.FLASH_MODE_ON
         } else {
             this.flashMode = ImageCapture.FLASH_MODE_OFF

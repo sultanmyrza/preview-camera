@@ -59,6 +59,13 @@ class PreviewCameraPlugin : Plugin() {
     }
 
     @PluginMethod
+    fun isTorchAvailable(call: PluginCall) {
+        val result = JSObject()
+        result.put("result", implementation.isTorchAvailable())
+        call.resolve(result)
+    }
+
+    @PluginMethod
     fun startPreview(call: PluginCall) {
 
         val hasCameraPermission =
