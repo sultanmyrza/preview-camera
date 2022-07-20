@@ -48,6 +48,10 @@ class PreviewCamera(private val bridge: Bridge) {
         }
     }
 
+    fun isTorchAvailable(): Boolean {
+        return previewCameraFragment?.isTorchAvailable() ?: false
+    }
+
     fun startPreview(call: PluginCall) {
         val cameraManager =
             bridge.activity.getSystemService(Context.CAMERA_SERVICE) as CameraManager
@@ -121,6 +125,7 @@ class PreviewCamera(private val bridge: Bridge) {
     fun flipCamera(call: PluginCall) {
         bridge.activity.runOnUiThread {
             previewCameraFragment?.flipCamera(call)
+            call.resolve()
         }
     }
 

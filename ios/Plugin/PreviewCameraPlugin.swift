@@ -213,6 +213,13 @@ public class PreviewCameraPlugin: CAPPlugin {
         self.previewCamera?.enableTorch(enable: value)
         call.resolve()
     }
+    
+    @objc func isTorchAvailable(_ call: CAPPluginCall) {
+        let result = self.previewCamera?.isTorchAvailable()
+        call.resolve([
+            "result": result
+        ])
+    }
 
     // MARK: - Helper methods
     func checkUsageDescriptions() -> String? {

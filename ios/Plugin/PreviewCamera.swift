@@ -33,6 +33,7 @@ typealias CapacitorNotifyListeners = (_ eventName: String, _ data: [String : Any
     var outputDirectory = FileManager.default.urls(for: .applicationDirectory, in: .userDomainMask)[0]
     
     var torchMode = AVCaptureDevice.TorchMode.off
+    var isTorchModeAvailable = false
 
     init(webView: UIView, parentView: UIView, settings: CameraSettings, notifyListeners:  @escaping CapacitorNotifyListeners) {
         self.webView = webView
@@ -85,16 +86,16 @@ typealias CapacitorNotifyListeners = (_ eventName: String, _ data: [String : Any
             photoOutputConnection.videoOrientation = videoOrientation()
         }
         
-        if self.torchMode == .on {
-            do {
-                try self.videoDeviceInput.device.lockForConfiguration()
+        do {
+            try self.videoDeviceInput.device.lockForConfiguration()
+            if self.videoDeviceInput.device.isTorchModeSupported(.on) && self.torchMode == .on {
                 self.videoDeviceInput.device.torchMode = .on
-                
-                self.videoDeviceInput.device.unlockForConfiguration()
-            } catch {
-                print("Failed to set torch for photo")
             }
+            self.videoDeviceInput.device.unlockForConfiguration()
+        } catch {
+            print("Failed to set torch for photo")
         }
+        
         let photoSettings = AVCapturePhotoSettings()
         photoSettings.isHighResolutionPhotoEnabled = true
         if #available(iOS 13.0, *) {
@@ -136,14 +137,14 @@ typealias CapacitorNotifyListeners = (_ eventName: String, _ data: [String : Any
         
         let filePath = createFile(FILENAME_FORMAT, VIDEO_EXTENSION)
         
-        if self.torchMode == .on {
-            do {
-                try self.videoDeviceInput.device.lockForConfiguration()
+        do {
+            try self.videoDeviceInput.device.lockForConfiguration()
+            if self.videoDeviceInput.device.isTorchModeSupported(.on) && self.torchMode == .on {
                 self.videoDeviceInput.device.torchMode = .on
-                self.videoDeviceInput.device.unlockForConfiguration()
-            } catch {
-                print("Failed to set torch for video")
             }
+            self.videoDeviceInput.device.unlockForConfiguration()
+        } catch {
+            print("Failed to set torch for video")
         }
         
         movieFileOutput.startRecording(to: filePath, recordingDelegate: self)
@@ -223,6 +224,11 @@ typealias CapacitorNotifyListeners = (_ eventName: String, _ data: [String : Any
                     
                     self.session.addInput(videoDeviceInput)
                     self.videoDeviceInput = videoDeviceInput
+                    if videoDeviceInput.device.isTorchModeSupported(.on) {
+                        self.isTorchModeAvailable = true
+                    } else {
+                        self.isTorchModeAvailable = false
+                    }
                 } else {
                     self.session.addInput(self.videoDeviceInput)
                 }
@@ -271,11 +277,18 @@ typealias CapacitorNotifyListeners = (_ eventName: String, _ data: [String : Any
     }
     
     public func enableTorch(enable: Bool) {
+        if self.videoDeviceInput.device.isFlashAvailable == false {
+            return
+        }
         if enable == true {
             self.torchMode = .on
         } else {
             self.torchMode = .off
         }
+    }
+    
+    public func isTorchAvailable() -> Bool {
+        return self.videoDeviceInput.device.isTorchModeSupported(.on)
     }
     
 

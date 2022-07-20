@@ -1,4 +1,5 @@
 import { WebPlugin } from '@capacitor/core';
+
 import type { PreviewCameraPlugin } from './definitions';
 
 export class PreviewCameraWeb extends WebPlugin implements PreviewCameraPlugin {
@@ -33,10 +34,13 @@ export class PreviewCameraWeb extends WebPlugin implements PreviewCameraPlugin {
   setFlashMode(): Promise<void> {
     throw new Error('Method not implemented.');
   }
-  isTorchOn(): Promise<{ result: boolean; }> {
+  isTorchOn(): Promise<{ result: boolean }> {
     throw new Error('Method not implemented.');
   }
   enableTorch(_: { enable: boolean }): Promise<void> {
+    throw new Error('Method not implemented.');
+  }
+  isTorchAvailable(): Promise<{ result: boolean }> {
     throw new Error('Method not implemented.');
   }
 }
