@@ -443,6 +443,28 @@ class PreviewCameraFragment : Fragment() {
         bindCameraUseCases()
     }
 
+    fun focus(x: Float, y: Float) {
+        // Get screen metrics used to setup camera for full screen resolution
+        val metrics = windowManager.getCurrentWindowMetrics().bounds
+        val factory: MeteringPointFactory = SurfaceOrientedMeteringPointFactory(
+            metrics.width().toFloat(), metrics.height().toFloat()
+        )
+        val autoFocusPoint = factory.createPoint(x, y)
+        try {
+            camera?.cameraControl?.startFocusAndMetering(
+                FocusMeteringAction.Builder(
+                    autoFocusPoint,
+                    FocusMeteringAction.FLAG_AF
+                ).apply {
+                    //focus only when the user tap the preview
+                    disableAutoCancel()
+                }.build()
+            )
+        } catch (e: CameraInfoUnavailableException) {
+            Log.d("ERROR", "cannot focus camera", e)
+        }
+    }
+
     /** Declare and bind preview, capture and analysis use cases */
     private fun bindCameraUseCases() {
 

@@ -160,6 +160,10 @@ class PreviewCamera(private val bridge: Bridge) {
             }
     }
 
+    fun focus(x: Float, y: Float) {
+        previewCameraFragment?.focus(x,y)
+    }
+
 
     companion object {
 
