@@ -37,10 +37,15 @@ export class PreviewCameraWeb extends WebPlugin implements PreviewCameraPlugin {
   isTorchOn(): Promise<{ result: boolean }> {
     throw new Error('Method not implemented.');
   }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   enableTorch(_: { enable: boolean }): Promise<void> {
     throw new Error('Method not implemented.');
   }
   isTorchAvailable(): Promise<{ result: boolean }> {
+    throw new Error('Method not implemented.');
+  }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  focus(_: { x: number; y: number }): Promise<void> {
     throw new Error('Method not implemented.');
   }
 }

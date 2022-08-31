@@ -26,6 +26,7 @@ npx cap sync
 * [`isTorchOn()`](#istorchon)
 * [`enableTorch(...)`](#enabletorch)
 * [`isTorchAvailable()`](#istorchavailable)
+* [`focus(...)`](#focus)
 * [`addListener('captureVideoFinished', ...)`](#addlistenercapturevideofinished)
 * [`addListener('capturePhotoFinished', ...)`](#addlistenercapturephotofinished)
 * [Interfaces](#interfaces)
@@ -164,6 +165,19 @@ isTorchAvailable() => Promise<{ result: boolean; }>
 ```
 
 **Returns:** <code>Promise&lt;{ result: boolean; }&gt;</code>
+
+--------------------
+
+
+### focus(...)
+
+```typescript
+focus(options: { x: number; y: number; }) => Promise<void>
+```
+
+| Param         | Type                                   |
+| ------------- | -------------------------------------- |
+| **`options`** | <code>{ x: number; y: number; }</code> |
 
 --------------------
 

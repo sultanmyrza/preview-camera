@@ -1,6 +1,6 @@
 {
   "name": "@numbersprotocol/preview-camera",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Preview Camera Plugin for iOS, Android",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",

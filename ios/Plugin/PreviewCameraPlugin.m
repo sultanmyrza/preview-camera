@@ -16,5 +16,6 @@ CAP_PLUGIN(PreviewCameraPlugin, "PreviewCamera",
            CAP_PLUGIN_METHOD(isTorchOn, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(enableTorch, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(isTorchAvailable, CAPPluginReturnPromise);
+           CAP_PLUGIN_METHOD(focus, CAPPluginReturnPromise);
            
 )

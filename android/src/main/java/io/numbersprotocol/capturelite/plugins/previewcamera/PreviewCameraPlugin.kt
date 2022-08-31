@@ -102,6 +102,13 @@ class PreviewCameraPlugin : Plugin() {
     }
 
     @PluginMethod
+    fun focus(call: PluginCall) {
+        val x = call.getFloat("x") ?: return call.resolve()
+        val y = call.getFloat("y") ?: return call.resolve()
+        implementation.focus(x, y)
+    }
+
+    @PluginMethod
     fun startRecord(call: PluginCall) {
         // TODO: check if camera started etc (Hint: copy logic from ios version)
 
