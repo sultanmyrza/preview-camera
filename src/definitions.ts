@@ -21,6 +21,7 @@ export interface PreviewCameraPlugin {
   isTorchOn(): Promise<{ result: boolean }>;
   enableTorch(options: { enable: boolean }): Promise<void>;
   isTorchAvailable(): Promise<{ result: boolean }>;
+  focus(options: { x: number; y: number }): Promise<void>;
   addListener(
     eventName: 'captureVideoFinished',
     listenerFunc: (data: CaptureResult) => void,
