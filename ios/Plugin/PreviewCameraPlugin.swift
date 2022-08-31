@@ -220,6 +220,18 @@ public class PreviewCameraPlugin: CAPPlugin {
             "result": result
         ])
     }
+    
+    @objc func focus(_ call: CAPPluginCall) {
+        guard let x = call.getFloat("x") else {
+            return call.resolve()
+        }
+        guard let y = call.getFloat("y") else {
+            return call.resolve()
+        }
+        self.previewCamera?.focus(x, y)
+        
+        
+    }
 
     // MARK: - Helper methods
     func checkUsageDescriptions() -> String? {

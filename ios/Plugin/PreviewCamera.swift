@@ -294,6 +294,38 @@ typealias CapacitorNotifyListeners = (_ eventName: String, _ data: [String : Any
         return videoDeviceInput.device.isTorchModeSupported(.on)
     }
     
+    public func focus(_ x: Float, _ y: Float) {
+        guard let device = self.videoDeviceInput?.device else {
+            // throw CameraError.session(SessionError.cameraNotReady)
+            return
+        }
+        if !device.isFocusPointOfInterestSupported {
+            //  throw CameraError.device(DeviceError.focusNotSupported)
+            return
+        }
+        let point = CGPoint(x: CGFloat(x), y: CGFloat(y))
+        
+        let normalizedPoint = self.previewLayer.captureDevicePointConverted(fromLayerPoint: point)
+        
+        do {
+            try device.lockForConfiguration()
+            
+            device.focusPointOfInterest = normalizedPoint
+            device.focusMode = .continuousAutoFocus
+            
+            if device.isExposurePointOfInterestSupported {
+                device.exposurePointOfInterest = normalizedPoint
+                device.exposureMode = .continuousAutoExposure
+            }
+            
+            device.unlockForConfiguration()
+            
+        } catch {
+            // throw CameraError.device(DeviceError.configureError)
+            print("Failed to focus")
+        }
+        
+    }
 
     // MARK: - PreviewCamera helper methods
     private func showCameraPreview() {
@@ -431,7 +463,7 @@ typealias CapacitorNotifyListeners = (_ eventName: String, _ data: [String : Any
         } catch {
             print(error)
         }
-        session.commitConfiguration()        
+        session.commitConfiguration()
         
     }
     
