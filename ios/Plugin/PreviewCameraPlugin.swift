@@ -215,7 +215,7 @@ public class PreviewCameraPlugin: CAPPlugin {
     }
     
     @objc func isTorchAvailable(_ call: CAPPluginCall) {
-        let result = self.previewCamera?.isTorchAvailable()
+        let result = self.previewCamera?.isTorchAvailable() ?? false
         call.resolve([
             "result": result
         ])
@@ -229,7 +229,27 @@ public class PreviewCameraPlugin: CAPPlugin {
             return call.resolve()
         }
         self.previewCamera?.focus(x, y)
-        
+    }
+    
+    @objc func minAvailableZoom(_ call: CAPPluginCall) {
+        let result = self.previewCamera?.minAvailableZoom() ?? 1.0
+        call.resolve([
+            "result": result
+        ])
+    }
+    
+    @objc func maxAvailableZoom(_ call: CAPPluginCall) {
+        let result = self.previewCamera?.maxAvailableZoom() ?? 1.0
+        call.resolve([
+            "result": result
+        ])
+    }
+    
+    @objc func zoom(_ call: CAPPluginCall) {
+        guard let zoomFactor = call.getFloat("factor") else {
+            return call.resolve()
+        }
+        self.previewCamera?.zoom(zoomFactor)
         
     }
 
