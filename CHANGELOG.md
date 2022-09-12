@@ -1,4 +1,9 @@
 # Changelog
+## 0.0.7 - 2022-09-12
+
+### Added
+
+- zoom in, zoom out features for iOS and Android
 
 ## 0.0.2 - 2022-05-05
 
