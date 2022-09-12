@@ -161,7 +161,19 @@ class PreviewCamera(private val bridge: Bridge) {
     }
 
     fun focus(x: Float, y: Float) {
-        previewCameraFragment?.focus(x,y)
+        previewCameraFragment?.focus(x, y)
+    }
+
+    fun minAvailableZoom(): Float {
+        return previewCameraFragment?.minAvailableZoom() ?: 0f
+    }
+
+    fun maxAvailableZoom(): Float {
+        return previewCameraFragment?.maxAvailableZoom() ?: 0f
+    }
+
+    fun zoom(zoomFactor: Float) {
+        previewCameraFragment?.zoom(zoomFactor)
     }
 
 

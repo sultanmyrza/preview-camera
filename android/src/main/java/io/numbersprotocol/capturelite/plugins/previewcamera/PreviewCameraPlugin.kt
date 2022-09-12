@@ -106,7 +106,30 @@ class PreviewCameraPlugin : Plugin() {
         val x = call.getFloat("x") ?: return call.resolve()
         val y = call.getFloat("y") ?: return call.resolve()
         implementation.focus(x, y)
+        call.resolve()
     }
+
+    @PluginMethod
+    fun minAvailableZoom(call: PluginCall) {
+        val result = JSObject()
+        result.put("result", implementation.minAvailableZoom())
+        call.resolve(result)
+    }
+
+    @PluginMethod
+    fun maxAvailableZoom(call: PluginCall) {
+        val result = JSObject()
+        result.put("result", implementation.maxAvailableZoom())
+        call.resolve(result)
+    }
+
+    @PluginMethod
+    fun zoom(call: PluginCall) {
+        val zoomFactor = call.getFloat("factor") ?: return call.resolve()
+        implementation.zoom(zoomFactor)
+        call.resolve()
+    }
+
 
     @PluginMethod
     fun startRecord(call: PluginCall) {

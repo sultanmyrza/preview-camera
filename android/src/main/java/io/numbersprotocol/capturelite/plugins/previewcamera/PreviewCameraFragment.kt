@@ -721,6 +721,22 @@ class PreviewCameraFragment : Fragment() {
         this.bindCameraUseCases()
     }
 
+    fun minAvailableZoom(): Float {
+        val defaultMinZoomRatio = 0f
+        val minZoomRatio = camera?.cameraInfo?.zoomState?.value?.minZoomRatio
+        return minZoomRatio ?: defaultMinZoomRatio
+    }
+
+    fun maxAvailableZoom(): Float {
+        val defaultMaxZoomRatio = 0f
+        val maxZoomRatio = camera?.cameraInfo?.zoomState?.value?.maxZoomRatio
+        return maxZoomRatio ?: defaultMaxZoomRatio
+    }
+
+    fun zoom(zoomFactor: Float) {
+        camera?.cameraControl?.setZoomRatio(zoomFactor)
+    }
+
     companion object {
         private val TAG = PreviewCameraFragment::class.java.simpleName
 
