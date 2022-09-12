@@ -48,4 +48,14 @@ export class PreviewCameraWeb extends WebPlugin implements PreviewCameraPlugin {
   focus(_: { x: number; y: number }): Promise<void> {
     throw new Error('Method not implemented.');
   }
+  minAvailableZoom(): Promise<{ result: number }> {
+    throw new Error('Method not implemented.');
+  }
+  maxAvailableZoom(): Promise<{ result: number }> {
+    throw new Error('Method not implemented.');
+  }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  zoom(_: { factor: number }): Promise<void> {
+    throw new Error('Method not implemented.');
+  }
 }

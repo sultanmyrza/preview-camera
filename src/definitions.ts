@@ -22,6 +22,9 @@ export interface PreviewCameraPlugin {
   enableTorch(options: { enable: boolean }): Promise<void>;
   isTorchAvailable(): Promise<{ result: boolean }>;
   focus(options: { x: number; y: number }): Promise<void>;
+  minAvailableZoom(): Promise<{ result: number }>;
+  maxAvailableZoom(): Promise<{ result: number }>;
+  zoom(options: { factor: number }): Promise<void>;
   addListener(
     eventName: 'captureVideoFinished',
     listenerFunc: (data: CaptureResult) => void,

@@ -27,6 +27,9 @@ npx cap sync
 * [`enableTorch(...)`](#enabletorch)
 * [`isTorchAvailable()`](#istorchavailable)
 * [`focus(...)`](#focus)
+* [`minAvailableZoom()`](#minavailablezoom)
+* [`maxAvailableZoom()`](#maxavailablezoom)
+* [`zoom(...)`](#zoom)
 * [`addListener('captureVideoFinished', ...)`](#addlistenercapturevideofinished)
 * [`addListener('capturePhotoFinished', ...)`](#addlistenercapturephotofinished)
 * [Interfaces](#interfaces)
@@ -178,6 +181,41 @@ focus(options: { x: number; y: number; }) => Promise<void>
 | Param         | Type                                   |
 | ------------- | -------------------------------------- |
 | **`options`** | <code>{ x: number; y: number; }</code> |
+
+--------------------
+
+
+### minAvailableZoom()
+
+```typescript
+minAvailableZoom() => Promise<{ result: number; }>
+```
+
+**Returns:** <code>Promise&lt;{ result: number; }&gt;</code>
+
+--------------------
+
+
+### maxAvailableZoom()
+
+```typescript
+maxAvailableZoom() => Promise<{ result: number; }>
+```
+
+**Returns:** <code>Promise&lt;{ result: number; }&gt;</code>
+
+--------------------
+
+
+### zoom(...)
+
+```typescript
+zoom(options: { factor: number; }) => Promise<void>
+```
+
+| Param         | Type                             |
+| ------------- | -------------------------------- |
+| **`options`** | <code>{ factor: number; }</code> |
 
 --------------------
 

@@ -326,6 +326,33 @@ typealias CapacitorNotifyListeners = (_ eventName: String, _ data: [String : Any
         }
         
     }
+    
+    public func minAvailableZoom() -> Float {
+        let minZoom = self.videoDeviceInput?.device.minAvailableVideoZoomFactor ?? 0.0
+        return Float(minZoom)
+    }
+    
+    public func maxAvailableZoom() -> Float {
+        let maxZoom = self.videoDeviceInput?.device.maxAvailableVideoZoomFactor ?? 0.0
+        return Float(maxZoom)
+    }
+    
+    public func zoom(_ zoomFactor: Float) {
+        guard let device = self.videoDeviceInput?.device else {
+            return
+        }
+        
+        let safeZoomFactor = max(min(CGFloat(zoomFactor), self.videoDeviceInput.device.maxAvailableVideoZoomFactor),CGFloat(1))
+        
+        do {
+            try device.lockForConfiguration()
+            device.videoZoomFactor = safeZoomFactor
+            device.unlockForConfiguration()
+        } catch {
+            // TODO: handle error case
+            print("Failed to zoom \(zoomFactor)")
+        }
+    }
 
     // MARK: - PreviewCamera helper methods
     private func showCameraPreview() {

@@ -17,5 +17,7 @@ CAP_PLUGIN(PreviewCameraPlugin, "PreviewCamera",
            CAP_PLUGIN_METHOD(enableTorch, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(isTorchAvailable, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(focus, CAPPluginReturnPromise);
-           
+           CAP_PLUGIN_METHOD(minAvailableZoom, CAPPluginReturnPromise);
+           CAP_PLUGIN_METHOD(maxAvailableZoom, CAPPluginReturnPromise);
+           CAP_PLUGIN_METHOD(zoom, CAPPluginReturnPromise);
 )
