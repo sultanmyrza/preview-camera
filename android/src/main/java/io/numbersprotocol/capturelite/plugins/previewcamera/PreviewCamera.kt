@@ -176,6 +176,12 @@ class PreviewCamera(private val bridge: Bridge) {
         previewCameraFragment?.zoom(zoomFactor)
     }
 
+    fun setQuality(quality: String) {
+        bridge.activity.runOnUiThread {
+            previewCameraFragment?.setQuality(quality)
+        }
+    }
+
 
     companion object {
 
