@@ -285,6 +285,10 @@ class PreviewCameraFragment : Fragment() {
                     override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                         val savedUri = output.savedUri
                         Log.d(TAG, "Photo capture succeeded: $savedUri")
+                        output.savedUri
+
+                        val file = File(savedUri?.path)
+                        val fileSize = file.length() / 1024
 
                         val data = JSObject().apply {
                             put("filePath", savedUri)
@@ -369,6 +373,9 @@ class PreviewCameraFragment : Fragment() {
                                 recordEvent.outputResults.outputUri
                                 val msg = "Video capture succeeded: $outputUri"
                                 Log.d(TAG, msg)
+
+                                val file = File(outputUri?.path)
+                                val fileSize = file.length() / 1024
 
                                 val data = JSObject().apply {
                                     put("errorMessage", null)
@@ -489,14 +496,17 @@ class PreviewCameraFragment : Fragment() {
         // CameraSelector
         val cameraSelector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
 
-        var aspectRatio = AspectRatio.RATIO_16_9
+        var aspectRatio = aspectRatio(metrics.width(), metrics.height())
         if (this.captureQuality == "low") {
-            aspectRatio = AspectRatio.RATIO_4_3
+            aspectRatio = aspectRatio(1920, 1080)
+            if (rotation % 2 == 0) {
+                aspectRatio = aspectRatio(1080, 1920)
+            }
         }
         // Preview
         preview = Preview.Builder()
             // We request aspect ratio but no resolution
-            .setTargetAspectRatio(screenAspectRatio)
+            .setTargetAspectRatio(aspectRatio)
 //            .setTargetAspectRatio(aspectRatio)
             // Set initial target rotation
             .setTargetRotation(rotation)
@@ -506,22 +516,21 @@ class PreviewCameraFragment : Fragment() {
         var imageQuality = 100
         var videoQuality = Quality.HIGHEST
         var captureMode = ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY
-        if(captureQuality=="low"){
-            imageQuality = 20
+        if (captureQuality == "low") {
+            imageQuality = 80
             videoQuality = Quality.LOWEST
             captureMode = ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY
         }
         // ImageCapture
         imageCapture = ImageCapture.Builder()
-            .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
             // .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
             // We request aspect ratio but no resolution to match preview config, but letting
             // CameraX optimize for whatever specific resolution best fits our use cases
-            .setTargetAspectRatio(screenAspectRatio)
+            .setTargetAspectRatio(aspectRatio)
             // Set initial target rotation, we will have to call this again if rotation changes
             // during the lifecycle of this use case
             .setTargetRotation(rotation)
-            .setCaptureMode(captureMode)
+            // .setCaptureMode(captureMode)
             .setJpegQuality(imageQuality)
             .setFlashMode(flashMode)
             .build()
