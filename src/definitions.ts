@@ -25,6 +25,7 @@ export interface PreviewCameraPlugin {
   minAvailableZoom(): Promise<{ result: number }>;
   maxAvailableZoom(): Promise<{ result: number }>;
   zoom(options: { factor: number }): Promise<void>;
+  setQuality(options: { quality: 'low' | 'hq' }): Promise<void>;
   addListener(
     eventName: 'captureVideoFinished',
     listenerFunc: (data: CaptureResult) => void,

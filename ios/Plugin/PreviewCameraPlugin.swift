@@ -252,6 +252,12 @@ public class PreviewCameraPlugin: CAPPlugin {
         self.previewCamera?.zoom(zoomFactor)
         
     }
+    
+    @objc func setQuality(_ call: CAPPluginCall) {
+        let quality = call.getString("quality") ?? "hq"
+        self.previewCamera?.setQuality(quality)
+        call.resolve()
+    }
 
     // MARK: - Helper methods
     func checkUsageDescriptions() -> String? {

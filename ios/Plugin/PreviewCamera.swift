@@ -5,6 +5,10 @@ import AVFoundation
 
 typealias CapacitorNotifyListeners = (_ eventName: String, _ data: [String : Any?]?) -> Void
 
+enum CaptureQuality {
+    case low, hq
+}
+
 @objc public class PreviewCamera: NSObject, AVCaptureFileOutputRecordingDelegate, AVCapturePhotoCaptureDelegate {
     
     let notifyListeners: CapacitorNotifyListeners
@@ -34,6 +38,8 @@ typealias CapacitorNotifyListeners = (_ eventName: String, _ data: [String : Any
     
     var torchMode = AVCaptureDevice.TorchMode.off
     var isTorchModeAvailable = false
+    
+    var captureQuality = CaptureQuality.hq
 
     init(webView: UIView, parentView: UIView, settings: CameraSettings, notifyListeners:  @escaping CapacitorNotifyListeners) {
         self.webView = webView
@@ -97,10 +103,19 @@ typealias CapacitorNotifyListeners = (_ eventName: String, _ data: [String : Any
         }
         
         let photoSettings = AVCapturePhotoSettings()
-        photoSettings.isHighResolutionPhotoEnabled = true
-        if #available(iOS 13.0, *) {
-            photoSettings.photoQualityPrioritization = .quality
+        
+        if captureQuality == .low {
+            photoSettings.isHighResolutionPhotoEnabled = false
+            if #available(iOS 13.0, *) {
+                photoSettings.photoQualityPrioritization = .speed
+            }
+        } else {
+            photoSettings.isHighResolutionPhotoEnabled = true
+            if #available(iOS 13.0, *) {
+                photoSettings.photoQualityPrioritization = .quality
+            }
         }
+        
         photoOutput.capturePhoto(with: photoSettings, delegate: self)
     }
 
@@ -110,7 +125,7 @@ typealias CapacitorNotifyListeners = (_ eventName: String, _ data: [String : Any
             self.capturePhotoFinished(errorMessage: "The photo and attachment data cannot be flattened.")
             return
         }
-        
+        let sizeInMB = ByteCountFormatter.string(fromByteCount: Int64(data.count), countStyle: .file)
         let filePath = createFile(FILENAME_FORMAT, PHOTO_EXTENSION)
         
         do {
@@ -127,6 +142,11 @@ typealias CapacitorNotifyListeners = (_ eventName: String, _ data: [String : Any
         }
         if cameraRecordStarted == true {
             throw PreviewCameraError.recordAlreadyStarted
+        }
+        
+        self.session.sessionPreset = .hd4K3840x2160
+        if self.captureQuality == .low {
+            self.session.sessionPreset = .hd1920x1080
         }
         
         // Update the orientation on the movie file output video connection before recording.
@@ -163,6 +183,8 @@ typealias CapacitorNotifyListeners = (_ eventName: String, _ data: [String : Any
             let errorMessage = "Movie file finishing error: \(String(describing: error))"
             self.captureVideoFinished(errorMessage: errorMessage)
         }
+        
+        let videoSizeInMB = ByteCountFormatter.string(fromByteCount: output.recordedFileSize, countStyle: .file)
         
         if success {
             self.captureVideoFinished(outputFileURL)
@@ -217,6 +239,9 @@ typealias CapacitorNotifyListeners = (_ eventName: String, _ data: [String : Any
                 self.session.beginConfiguration()
                 
                 self.session.sessionPreset = .high
+                if self.captureQuality == .low {
+                    self.session.sessionPreset = .medium
+                }
                 
                 self.session.removeInput(self.videoDeviceInput)
                 
@@ -237,20 +262,20 @@ typealias CapacitorNotifyListeners = (_ eventName: String, _ data: [String : Any
                 if self.session.canAddOutput(movieFileOutput) {
                     self.session.addOutput(movieFileOutput)
                     
-                    do {
-                        try self.videoDeviceInput.device.lockForConfiguration()
-                        for format in self.videoDeviceInput.device.formats {
-                            if #available(iOS 15.0, *) {
-                                if format.isHighPhotoQualitySupported {
-                                    self.videoDeviceInput.device.activeFormat = format
-                                    break
-                                }
-                            }
-                        }
-                        self.videoDeviceInput.device.unlockForConfiguration()
-                    } catch {
-                        print("Could not lock device for configuration: \(error)")
-                    }
+//                    do {
+//                        try self.videoDeviceInput.device.lockForConfiguration()
+//                        for format in self.videoDeviceInput.device.formats {
+//                            if #available(iOS 15.0, *) {
+//                                if format.isHighPhotoQualitySupported {
+//                                    self.videoDeviceInput.device.activeFormat = format
+//                                    break
+//                                }
+//                            }
+//                        }
+//                        self.videoDeviceInput.device.unlockForConfiguration()
+//                    } catch {
+//                        print("Could not lock device for configuration: \(error)")
+//                    }
                 }
                 
                 previewLayer.videoGravity = .resizeAspectFill
@@ -351,6 +376,16 @@ typealias CapacitorNotifyListeners = (_ eventName: String, _ data: [String : Any
         } catch {
             // TODO: handle error case
             print("Failed to zoom \(zoomFactor)")
+        }
+    }
+    
+    public func setQuality(_ quality: String) {
+        if quality == "low" {
+            captureQuality = .low
+            session.sessionPreset = .hd1920x1080
+        } else {
+            captureQuality = .hq
+            session.sessionPreset = .high
         }
     }
 
@@ -619,4 +654,15 @@ typealias CapacitorNotifyListeners = (_ eventName: String, _ data: [String : Any
             
             return videoOrientation
         }
+    
+    private func isFrontCamera() -> Bool {
+        let currentVideoDevice = self.videoDeviceInput.device
+        let currentPosition = currentVideoDevice.position
+        
+        if currentPosition == .unspecified || currentPosition == .back {
+            return false
+        }
+        
+        return true
+    }
 }

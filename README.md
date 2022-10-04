@@ -30,6 +30,7 @@ npx cap sync
 * [`minAvailableZoom()`](#minavailablezoom)
 * [`maxAvailableZoom()`](#maxavailablezoom)
 * [`zoom(...)`](#zoom)
+* [`setQuality(...)`](#setquality)
 * [`addListener('captureVideoFinished', ...)`](#addlistenercapturevideofinished)
 * [`addListener('capturePhotoFinished', ...)`](#addlistenercapturephotofinished)
 * [Interfaces](#interfaces)
@@ -216,6 +217,19 @@ zoom(options: { factor: number; }) => Promise<void>
 | Param         | Type                             |
 | ------------- | -------------------------------- |
 | **`options`** | <code>{ factor: number; }</code> |
+
+--------------------
+
+
+### setQuality(...)
+
+```typescript
+setQuality(options: { quality: 'low' | 'hq'; }) => Promise<void>
+```
+
+| Param         | Type                                     |
+| ------------- | ---------------------------------------- |
+| **`options`** | <code>{ quality: 'low' \| 'hq'; }</code> |
 
 --------------------
 

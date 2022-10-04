@@ -74,6 +74,9 @@ class PreviewCameraFragment : Fragment() {
 
     private var currentDisplayOrientation = 0;
 
+    private var cameraSetupCompleted = false
+    private var captureQuality = "hq" // can be "low" or "hq" TODO: change to enums
+
     var flashMode = ImageCapture.FLASH_MODE_OFF
     var flashModeAvailable = true;
 
@@ -226,6 +229,7 @@ class PreviewCameraFragment : Fragment() {
 
             // Build and bind the camera use cases
             bindCameraUseCases()
+            this.cameraSetupCompleted = true
         }, ContextCompat.getMainExecutor(requireContext()))
     }
 
@@ -281,6 +285,10 @@ class PreviewCameraFragment : Fragment() {
                     override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                         val savedUri = output.savedUri
                         Log.d(TAG, "Photo capture succeeded: $savedUri")
+                        output.savedUri
+
+                        val file = File(savedUri?.path)
+                        val fileSize = file.length() / 1024
 
                         val data = JSObject().apply {
                             put("filePath", savedUri)
@@ -365,6 +373,9 @@ class PreviewCameraFragment : Fragment() {
                                 recordEvent.outputResults.outputUri
                                 val msg = "Video capture succeeded: $outputUri"
                                 Log.d(TAG, msg)
+
+                                val file = File(outputUri?.path)
+                                val fileSize = file.length() / 1024
 
                                 val data = JSObject().apply {
                                     put("errorMessage", null)
@@ -485,33 +496,49 @@ class PreviewCameraFragment : Fragment() {
         // CameraSelector
         val cameraSelector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
 
+        var aspectRatio = aspectRatio(metrics.width(), metrics.height())
+        if (this.captureQuality == "low") {
+            aspectRatio = aspectRatio(1920, 1080)
+            if (rotation % 2 == 0) {
+                aspectRatio = aspectRatio(1080, 1920)
+            }
+        }
         // Preview
         preview = Preview.Builder()
             // We request aspect ratio but no resolution
-            .setTargetAspectRatio(screenAspectRatio)
+            .setTargetAspectRatio(aspectRatio)
+//            .setTargetAspectRatio(aspectRatio)
             // Set initial target rotation
             .setTargetRotation(rotation)
             .build()
             .also { it.setSurfaceProvider(fragmentCameraBinding.viewFinder.surfaceProvider) }
 
+        var imageQuality = 100
+        var videoQuality = Quality.HIGHEST
+        var captureMode = ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY
+        if (captureQuality == "low") {
+            imageQuality = 80
+            videoQuality = Quality.LOWEST
+            captureMode = ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY
+        }
         // ImageCapture
         imageCapture = ImageCapture.Builder()
-            .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
             // .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
             // We request aspect ratio but no resolution to match preview config, but letting
             // CameraX optimize for whatever specific resolution best fits our use cases
-            .setTargetAspectRatio(screenAspectRatio)
+            .setTargetAspectRatio(aspectRatio)
             // Set initial target rotation, we will have to call this again if rotation changes
             // during the lifecycle of this use case
             .setTargetRotation(rotation)
-            .setJpegQuality(100)
+            // .setCaptureMode(captureMode)
+            .setJpegQuality(imageQuality)
             .setFlashMode(flashMode)
             .build()
 
         // VideoRecorder
         val recorder = Recorder.Builder().setQualitySelector(
             QualitySelector.from(
-                Quality.HIGHEST,
+                videoQuality,
                 FallbackStrategy.higherQualityOrLowerThan(Quality.SD)
             )
         ).build()
@@ -526,6 +553,27 @@ class PreviewCameraFragment : Fragment() {
             camera = cameraProvider.bindToLifecycle(
                 viewLifecycleOwner, cameraSelector, preview, imageCapture, videoCapture
             )
+
+            val supportedQualities = QualitySelector.getSupportedQualities(camera!!.cameraInfo)
+            for (quality in supportedQualities) {
+                when (quality) {
+                    Quality.UHD -> {
+                        Log.e(TAG, "Supported quality: Ultra High Definition (UHD) - 2160p")
+                    }
+                    Quality.FHD -> {
+                        //Add "Full High Definition (FHD) - 1080p" to the list
+                        Log.e(TAG, "Supported quality: Full High Definition (FHD) - 1080p")
+                    }
+                    Quality.HD -> {
+                        //Add "High Definition (HD) - 720p" to the list
+                        Log.e(TAG, "Supported quality: High Definition (HD) - 720p")
+                    }
+                    Quality.SD -> {
+                        //Add "Standard Definition (SD) - 480p" to the list
+                        Log.e(TAG, "Supported quality: Standard Definition (SD) - 480p")
+                    }
+                }
+            }
 
 //            if (flashMode == ImageCapture.FLASH_MODE_ON)
 //                camera?.cameraControl?.enableTorch(true)
@@ -735,6 +783,17 @@ class PreviewCameraFragment : Fragment() {
 
     fun zoom(zoomFactor: Float) {
         camera?.cameraControl?.setZoomRatio(zoomFactor)
+    }
+
+    fun setQuality(quality: String) {
+        if (quality == "low") {
+            this.captureQuality = "low"
+        } else {
+            this.captureQuality = "hq"
+        }
+        if (cameraSetupCompleted) {
+            bindCameraUseCases()
+        }
     }
 
     companion object {

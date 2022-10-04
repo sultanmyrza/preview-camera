@@ -110,6 +110,13 @@ class PreviewCameraPlugin : Plugin() {
     }
 
     @PluginMethod
+    fun setQuality(call: PluginCall){
+        val quality = call.getString("quality") ?: "hq"
+        implementation.setQuality(quality)
+        call.resolve()
+    }
+
+    @PluginMethod
     fun minAvailableZoom(call: PluginCall) {
         val result = JSObject()
         result.put("result", implementation.minAvailableZoom())
