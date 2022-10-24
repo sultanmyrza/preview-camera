@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.9 - 2022-10-24
+
+### Fixed
+
+- fixed ios front camera record video
+
 ## 0.0.8 - 2022-10-04
 
 ### Added
