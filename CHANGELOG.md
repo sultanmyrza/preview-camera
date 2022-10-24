@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.10 - 2022-10-24
+
+### Fixed
+
+- Fixed ios camera quality presets
+
 ## 0.0.9 - 2022-10-24
 
 ### Fixed
