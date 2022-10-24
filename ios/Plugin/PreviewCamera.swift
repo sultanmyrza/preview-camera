@@ -144,9 +144,11 @@ enum CaptureQuality {
             throw PreviewCameraError.recordAlreadyStarted
         }
         
-        self.session.sessionPreset = .hd4K3840x2160
+        // self.session.sessionPreset = .hd4K3840x2160
+        self.session.sessionPreset = .high
         if self.captureQuality == .low {
-            self.session.sessionPreset = .hd1920x1080
+            // self.session.sessionPreset = .hd1920x1080
+            self.session.sessionPreset = .low
         }
         
         // Update the orientation on the movie file output video connection before recording.
