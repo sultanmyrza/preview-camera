@@ -148,7 +148,7 @@ enum CaptureQuality {
         self.session.sessionPreset = .high
         if self.captureQuality == .low {
             // self.session.sessionPreset = .hd1920x1080
-            self.session.sessionPreset = .low
+            self.session.sessionPreset = .medium
         }
         
         // Update the orientation on the movie file output video connection before recording.
@@ -384,7 +384,7 @@ enum CaptureQuality {
     public func setQuality(_ quality: String) {
         if quality == "low" {
             captureQuality = .low
-            session.sessionPreset = .hd1920x1080
+            session.sessionPreset = .medium
         } else {
             captureQuality = .hq
             session.sessionPreset = .high
