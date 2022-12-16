@@ -2,6 +2,7 @@ import Foundation
 import Capacitor
 import Photos
 import PhotosUI
+import CoreMotion
 
 /**
  * Please read the Capacitor iOS Plugin Development Guide
@@ -14,6 +15,12 @@ public class PreviewCameraPlugin: CAPPlugin {
     private var previewCamera: PreviewCamera?
     private let defaultDirection = CameraDirection.rear
     private let defaultResultType = CameraResultType.base64
+    private let motionManager = CMMotionManager()
+    private var motionTimer: Timer?
+    
+    private let sensorNotificationIntervalInSeconds = 1
+    
+    private var customOrientation = "portraitUp"
 
     // MARK: - Capacitor override methods
     override public func load() {
@@ -25,8 +32,7 @@ public class PreviewCameraPlugin: CAPPlugin {
             CAPLog.print("⚡️ ", self.pluginId, "-", "CAPPlugin.bridge?.webView is not available. Please file an issue")
             return
         }
-        
-        
+                
         previewCamera = PreviewCamera(webView: webView, parentView: parentView, settings: CameraSettings(), notifyListeners: notifyListeners)
     }
 
@@ -102,6 +108,9 @@ public class PreviewCameraPlugin: CAPPlugin {
         AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
             if granted {
                 do {
+                    DispatchQueue.main.async {
+                        self?.startAccelerometerBroadcast()
+                    }
                     try self?.previewCamera?.startCameraPreview(settings: self?.cameraSettings(from: call))
                     self?.hideBackground()
                     call.resolve()
@@ -111,6 +120,76 @@ public class PreviewCameraPlugin: CAPPlugin {
 
             }
         }
+    }
+    
+    private func startAccelerometerBroadcast() {
+        motionManager.startAccelerometerUpdates()
+        motionManager.accelerometerUpdateInterval = 0.2
+        
+        self.motionTimer?.invalidate()
+       
+        self.motionTimer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(onSensorChnaged), userInfo: nil, repeats: true)
+        
+    }
+    
+    private func stopAccelerometerBroadcast() {
+        self.motionManager.stopAccelerometerUpdates()
+        self.motionTimer?.invalidate()
+        self.motionTimer = nil
+    }
+    
+    @objc private func onSensorChnaged() {
+        var newOrientation = "portraitUp"
+        if let data = self.motionManager.accelerometerData {
+            newOrientation = self.calculateOrientation(data)
+        }
+        if newOrientation != self.customOrientation {
+            self.previewCamera?.customOrientation = newOrientation
+            let data = ["orientation": newOrientation]
+            self.notifyListeners("accelerometerOrientation", data: data)
+            print("🚀 newOrientation: \(newOrientation)")
+            self.customOrientation = newOrientation
+        }
+        
+    }
+    
+    @objc private func calculateOrientation(_ acceleroMeterData: CMAccelerometerData) -> String {
+        let acceleration = acceleroMeterData.acceleration
+        
+        let inclinationRad = atan2(acceleration.y, acceleration.x)
+        let formatedInclination = String(format: "%.2f", inclinationRad)
+        
+        
+        var simpleOrientation = "portraitUp"
+        // TODO: calculate again
+        if inclinationRad.isBetween(a: -2.30, b: -0.80) {
+            simpleOrientation = "portraitUp"
+        }
+        if inclinationRad.isBetween(a: -0.80, b: 0.80) {
+            simpleOrientation = "landscapeRight"
+        }
+        if inclinationRad.isBetween(a: 0.80, b: 2.30) {
+            simpleOrientation = "portraitDown"
+        }
+        if inclinationRad.isBetween(a: 2.30, b: 3.20) || inclinationRad.isBetween(a: -3.20, b: -2.30) {
+            simpleOrientation = "landscapeLeft"
+        }
+        return simpleOrientation
+        
+//        var preciseScressnOrientation = "portraitUp"
+//        if inclinationRad.isBetween(a: -1.5, b: 0.0) ||
+//            inclinationRad.isBetween(a: 0.0, b: 1.5) {
+//            preciseScressnOrientation = "landscapeRight"
+//        } else {
+//            preciseScressnOrientation = "landscapeLeft"
+//        }
+//        if inclinationRad.isBetween(a: -3.0, b: 0.0) {
+//            preciseScressnOrientation = "portraitUp"
+//        } else {
+//            preciseScressnOrientation = "portraitDown"
+//        }
+//
+//        return preciseScressnOrientation
     }
     
     private func hideBackground() {
@@ -146,6 +225,9 @@ public class PreviewCameraPlugin: CAPPlugin {
         do {
             try implementation.stopPreviewCamera()
             self.showBackground()
+            DispatchQueue.main.async {
+                self.stopAccelerometerBroadcast()
+            }
             call.resolve()
         } catch let error as PreviewCameraError { call.reject(error.message) } catch { call.reject("Unknow error on stopPreview") }
     }
@@ -283,4 +365,10 @@ public class PreviewCameraPlugin: CAPPlugin {
         return settings
     }
     
+}
+
+extension Double {
+    func isBetween(a: Double, b: Double) -> Bool {
+        a < self && self < b
+    }
 }

@@ -38,6 +38,7 @@ enum CaptureQuality {
     
     var torchMode = AVCaptureDevice.TorchMode.off
     var isTorchModeAvailable = false
+    var customOrientation = "portraitUp"
     
     var captureQuality = CaptureQuality.hq
 
@@ -281,6 +282,11 @@ enum CaptureQuality {
                 }
                 
                 previewLayer.videoGravity = .resizeAspectFill
+                DispatchQueue.main.async { [weak self] in
+                    guard let strongSelf = self else { return }
+
+                    strongSelf.previewLayer.frame = strongSelf.previewLayerWrapper.safeAreaLayoutGuide.layoutFrame
+                }
                 previewLayer.session = session
             }
         }
@@ -406,7 +412,7 @@ enum CaptureQuality {
         
         // display previewLayer: AVCaptureVideoPreviewLayer on previewLayerWrapper: UIView
         previewLayerWrapper.layer.insertSublayer(previewLayer, at: 0)
-        previewLayer.frame = previewLayerWrapper.frame
+        previewLayer.frame = previewLayerWrapper.safeAreaLayoutGuide.layoutFrame
         previewLayer.session?.startRunning()
     }
     
@@ -420,7 +426,7 @@ enum CaptureQuality {
         webView.isOpaque = true
     }
     
-    private func setupCamera() throws {
+private func setupCamera() throws {
         
 //        session.beginConfiguration()
         
@@ -523,6 +529,12 @@ enum CaptureQuality {
             }
             
             previewLayer.videoGravity = .resizeAspectFill
+            
+            DispatchQueue.main.async { [weak self] in
+                guard let strongSelf = self else { return }
+
+                strongSelf.previewLayer.frame = strongSelf.previewLayerWrapper.safeAreaLayoutGuide.layoutFrame
+            }
             previewLayer.session = session
         } catch {
             print(error)
@@ -614,48 +626,106 @@ enum CaptureQuality {
     // MARK: - Utility functions
     
     private func videoOrientation() -> AVCaptureVideoOrientation {
-            
-            var videoOrientation: AVCaptureVideoOrientation!
-            
-            let orientation: UIDeviceOrientation = UIDevice.current.orientation
-            
-            switch orientation {
-                
-            case .faceUp, .faceDown, .unknown:
-                
-                // let interfaceOrientation = UIApplication.shared.statusBarOrientation
-                
-                if #available(iOS 13.0, *) {
-                    if let interfaceOrientation = UIApplication.shared.windows.first(where: { $0.isKeyWindow })?.windowScene?.interfaceOrientation {
-                        
-                        switch interfaceOrientation {
-                            
-                        case .portrait, .portraitUpsideDown, .unknown:
-                            videoOrientation = .portrait
-                        case .landscapeLeft:
-                            videoOrientation = .landscapeRight
-                        case .landscapeRight:
-                            videoOrientation = .landscapeLeft
-                        @unknown default:
-                            videoOrientation = .portrait
-                        }
-                    }
-                } else {
-                    // Fallback on earlier versions
-                }
-                
-            case .portrait, .portraitUpsideDown:
-                videoOrientation = .portrait
-            case .landscapeLeft:
-                videoOrientation = .landscapeRight
-            case .landscapeRight:
-                videoOrientation = .landscapeLeft
-            @unknown default:
-                videoOrientation = .portrait
-            }
-            
-            return videoOrientation
+        
+        var videoOrientation: AVCaptureVideoOrientation = .portrait
+        if self.customOrientation == "landscapeRight" {
+            videoOrientation = .landscapeLeft
         }
+        if self.customOrientation == "landscapeLeft" {
+            videoOrientation = .landscapeRight
+        }
+        return videoOrientation;
+        
+//        let orientation: UIDeviceOrientation = UIDevice.current.orientation
+//
+//        switch orientation {
+//
+//        case .faceUp, .faceDown, .unknown:
+//
+//            // let interfaceOrientation = UIApplication.shared.statusBarOrientation
+//
+//            if #available(iOS 13.0, *) {
+//                if let interfaceOrientation = UIApplication.shared.windows.first(where: { $0.isKeyWindow })?.windowScene?.interfaceOrientation {
+//
+//                    switch interfaceOrientation {
+//
+//                    case .portrait, .portraitUpsideDown, .unknown:
+//                        videoOrientation = .portrait
+//                    case .landscapeLeft:
+//                        videoOrientation = .landscapeRight
+//                    case .landscapeRight:
+//                        videoOrientation = .landscapeLeft
+//                    @unknown default:
+//                        videoOrientation = .portrait
+//                    }
+//                }
+//            } else {
+//                // Fallback on earlier versions
+//            }
+//
+//        case .portrait, .portraitUpsideDown:
+//            videoOrientation = .portrait
+//        case .landscapeLeft:
+//            videoOrientation = .landscapeRight
+//        case .landscapeRight:
+//            videoOrientation = .landscapeLeft
+//        @unknown default:
+//            videoOrientation = .portrait
+//        }
+//
+//
+//        if #available(iOS 13.0, *) {
+//            if let interfaceOrientation = UIApplication.shared.windows.first(where: { $0.isKeyWindow })?.windowScene?.interfaceOrientation {
+//
+//                switch interfaceOrientation {
+//
+//                case .portrait, .portraitUpsideDown, .unknown:
+//                    videoOrientation = .portrait
+//                case .landscapeLeft:
+//                    videoOrientation = .landscapeRight
+//                case .landscapeRight:
+//                    videoOrientation = .landscapeLeft
+//                @unknown default:
+//                    videoOrientation = .portrait
+//                }
+//            }
+//        } else {
+//            // Fallback on earlier versions
+//        }
+//
+//        var customOrientation: UIDeviceOrientation = .portrait
+//        if #available(iOS 13.0, *) {
+//            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+//                let interfaceOrientation = windowScene.interfaceOrientation
+//                switch interfaceOrientation {
+//                case .landscapeRight:
+//                    customOrientation = .landscapeRight
+//                case .landscapeLeft:
+//                    customOrientation = .landscapeLeft
+//                default:
+//                    customOrientation = .portrait
+//                }
+//            }
+//        } else {
+//            switch UIApplication.shared.statusBarOrientation {
+//            case .landscapeRight:
+//                customOrientation = .landscapeRight
+//            case .landscapeLeft:
+//                customOrientation = .landscapeLeft
+//            default:
+//                customOrientation = .portrait
+//            }
+//        }
+//
+//        switch customOrientation {
+//        case .landscapeLeft, .landscapeRight:
+//            videoOrientation = .landscapeRight
+//        default:
+//            videoOrientation = .portrait
+//        }
+//
+//        return videoOrientation
+    }
     
     private func isFrontCamera() -> Bool {
         let currentVideoDevice = self.videoDeviceInput.device
