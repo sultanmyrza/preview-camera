@@ -33,7 +33,10 @@ npx cap sync
 * [`setQuality(...)`](#setquality)
 * [`addListener('captureVideoFinished', ...)`](#addlistenercapturevideofinished)
 * [`addListener('capturePhotoFinished', ...)`](#addlistenercapturephotofinished)
+* [`addListener('accelerometerOrientation', ...)`](#addlisteneraccelerometerorientation)
+* [`removeAllListeners()`](#removealllisteners)
 * [Interfaces](#interfaces)
+* [Type Aliases](#type-aliases)
 
 </docgen-index>
 
@@ -266,6 +269,31 @@ addListener(eventName: 'capturePhotoFinished', listenerFunc: (data: CaptureResul
 --------------------
 
 
+### addListener('accelerometerOrientation', ...)
+
+```typescript
+addListener(eventName: 'accelerometerOrientation', listenerFunc: (data: { orientation: CustomOrientation; }) => void) => Promise<PluginListenerHandle> & PluginListenerHandle
+```
+
+| Param              | Type                                                                                                 |
+| ------------------ | ---------------------------------------------------------------------------------------------------- |
+| **`eventName`**    | <code>'accelerometerOrientation'</code>                                                              |
+| **`listenerFunc`** | <code>(data: { orientation: <a href="#customorientation">CustomOrientation</a>; }) =&gt; void</code> |
+
+**Returns:** <code>Promise&lt;<a href="#pluginlistenerhandle">PluginListenerHandle</a>&gt; & <a href="#pluginlistenerhandle">PluginListenerHandle</a></code>
+
+--------------------
+
+
+### removeAllListeners()
+
+```typescript
+removeAllListeners() => Promise<void>
+```
+
+--------------------
+
+
 ### Interfaces
 
 
@@ -282,5 +310,13 @@ addListener(eventName: 'capturePhotoFinished', listenerFunc: (data: CaptureResul
 | ------------------ | ------------------- | ------------------------------------------------------------------------------------------- |
 | **`filePath`**     | <code>string</code> | File path for photo or video taken by camera. Example: file://your-app-dir/.../my-video.mp4 |
 | **`errorMessage`** | <code>string</code> | Error message if any                                                                        |
+
+
+### Type Aliases
+
+
+#### CustomOrientation
+
+<code>'portraitUp' | 'portraitDown' | 'landscapeRight' | 'landscaperLeft'</code>
 
 </docgen-api>

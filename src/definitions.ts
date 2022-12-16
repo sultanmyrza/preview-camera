@@ -7,6 +7,12 @@ export interface CaptureResult {
   errorMessage?: string;
 }
 
+export type CustomOrientation =
+  | 'portraitUp'
+  | 'portraitDown'
+  | 'landscapeRight'
+  | 'landscaperLeft';
+
 export interface PreviewCameraPlugin {
   echo(options: { value: string }): Promise<{ value: string }>;
   startPreview(): Promise<void>;
@@ -34,4 +40,9 @@ export interface PreviewCameraPlugin {
     eventName: 'capturePhotoFinished',
     listenerFunc: (data: CaptureResult) => void,
   ): Promise<PluginListenerHandle> & PluginListenerHandle;
+  addListener(
+    eventName: 'accelerometerOrientation',
+    listenerFunc: (data: {orientation: CustomOrientation}) => void,
+  ): Promise<PluginListenerHandle> & PluginListenerHandle;
+  removeAllListeners(): Promise<void>;
 }
