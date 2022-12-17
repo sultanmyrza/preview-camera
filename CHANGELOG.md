@@ -1,4 +1,9 @@
 # Changelog
+## 0.0.11 - 2022-12-17
+
+### Added
+
+- Detect orientation regardles of auto-rotate on/off
 
 ## 0.0.10 - 2022-10-24
 
