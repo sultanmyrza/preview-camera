@@ -1,10 +1,18 @@
 package io.numbersprotocol.capturelite.plugins.previewcamera
 
 import android.Manifest
+import android.content.Context
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
+import android.util.Log
 import com.getcapacitor.*
 import com.getcapacitor.annotation.CapacitorPlugin
 import com.getcapacitor.annotation.Permission
 import com.getcapacitor.annotation.PermissionCallback
+import kotlin.math.abs
+import kotlin.math.atan2
 
 
 @CapacitorPlugin(
@@ -20,7 +28,7 @@ import com.getcapacitor.annotation.PermissionCallback
     ]
 
 )
-class PreviewCameraPlugin : Plugin() {
+class PreviewCameraPlugin : Plugin(), SensorEventListener {
 
     companion object {
         const val CAMERA_PERMISSION_ALIAS = "cameraPermissionAlias"
@@ -31,8 +39,16 @@ class PreviewCameraPlugin : Plugin() {
 
     private var allowUsersRecordVideoWithoutSound = false
 
+    private lateinit var sensorManager: SensorManager
+
+    private var lastSensorNotificationTimeInMilliseconds = System.currentTimeMillis()
+    private val sensorNotificationIntervalInMilliseconds = 1400
+
+    private var customOrientation = ".portraitUp"
+
     override fun load() {
         implementation = PreviewCamera(bridge)
+        sensorManager = bridge.activity.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         super.load()
     }
 
@@ -76,6 +92,7 @@ class PreviewCameraPlugin : Plugin() {
 
 
         if (hasCameraPermission) {
+            startAccelerometerBroadcast()
             implementation.startPreview(call)
         } else {
             requestPermissionForAlias(CAMERA_PERMISSION_ALIAS, call, "handleCameraPermissionResult")
@@ -83,9 +100,19 @@ class PreviewCameraPlugin : Plugin() {
         }
     }
 
+    private fun startAccelerometerBroadcast() {
+        val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI)
+    }
+
+    private fun stopAccelerometerBroadcast() {
+        sensorManager.unregisterListener(this)
+    }
+
     @PluginMethod
     fun stopPreview(call: PluginCall) {
         implementation.stopPreview(call);
+        stopAccelerometerBroadcast()
     }
 
     @PluginMethod
@@ -110,7 +137,7 @@ class PreviewCameraPlugin : Plugin() {
     }
 
     @PluginMethod
-    fun setQuality(call: PluginCall){
+    fun setQuality(call: PluginCall) {
         val quality = call.getString("quality") ?: "hq"
         implementation.setQuality(quality)
         call.resolve()
@@ -165,6 +192,7 @@ class PreviewCameraPlugin : Plugin() {
     @PermissionCallback
     private fun handleCameraPermissionResult(call: PluginCall) {
         if (PermissionState.GRANTED == getPermissionState(CAMERA_PERMISSION_ALIAS)) {
+            startAccelerometerBroadcast()
             implementation.startPreview(call)
         } else {
             call.reject("Camera permission not granted")
@@ -184,5 +212,46 @@ class PreviewCameraPlugin : Plugin() {
                 call.reject("Record Audio permission not granted")
             }
         }
+    }
+
+    override fun onSensorChanged(sensorEvent: SensorEvent?) {
+        if (!shouldNotifyAccelerometerChange()) return
+        if (sensorEvent?.sensor?.type == Sensor.TYPE_ACCELEROMETER) {
+            val (accelerationX, accelerationY, accelerationZ) = sensorEvent.values
+            val preciseInclinationInRad = atan2(accelerationY, accelerationX)
+            val inclinationRad = String.format("%.1f", preciseInclinationInRad).toFloat()
+
+            var newCustomOrientation = "portraitUp"
+            if (inclinationRad.isBetween(0.6, 2.2))
+                newCustomOrientation = "portraitUp"
+            if (inclinationRad.isBetween(2.3, 3.3) || inclinationRad.isBetween(-3.3, -2.3))
+                newCustomOrientation = "landscapeRight"
+            if (inclinationRad.isBetween(-2.3, -0.9))
+                newCustomOrientation = "portraitDown"
+            if (inclinationRad.isBetween(-0.9, 0.0) || inclinationRad.isBetween(0.0, 0.6))
+                newCustomOrientation = "landscapeLeft"
+
+
+            if (newCustomOrientation != customOrientation) {
+                implementation.shouldRebuildCameraUseCases(newCustomOrientation)
+            }
+
+            val data = JSObject()
+            data.put("orientation", newCustomOrientation)
+            notifyListeners("accelerometerOrientation", data)
+
+            lastSensorNotificationTimeInMilliseconds = System.currentTimeMillis()
+            customOrientation = newCustomOrientation
+        }
+    }
+
+    override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
+        // No logic needed here overriding onSensorChanged is enough for our use case
+    }
+
+    private fun shouldNotifyAccelerometerChange(): Boolean {
+        val currentTime = System.currentTimeMillis()
+        val difference = currentTime - lastSensorNotificationTimeInMilliseconds
+        return difference > sensorNotificationIntervalInMilliseconds;
     }
 }

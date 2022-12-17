@@ -9,6 +9,7 @@ import android.hardware.camera2.CameraManager
 import android.hardware.camera2.CameraMetadata
 import android.util.DisplayMetrics
 import android.util.Log
+import android.view.Surface
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
@@ -182,6 +183,23 @@ class PreviewCamera(private val bridge: Bridge) {
         }
     }
 
+    fun shouldRebuildCameraUseCases(newCustomOrientation: String) {
+        if (previewCameraFragment?.recording != null) return;
+
+        bridge.activity.runOnUiThread {
+            var orientation = Surface.ROTATION_0
+            if (newCustomOrientation == "landscapeRight")
+                orientation = Surface.ROTATION_90
+            if (newCustomOrientation == "portraitDown")
+                orientation = Surface.ROTATION_180
+            if (newCustomOrientation == "landscapeLeft")
+                orientation = Surface.ROTATION_270
+//            previewCameraFragment?.bindCameraUseCases(orientation)
+            Log.d("Custom Orientation", newCustomOrientation)
+            previewCameraFragment?.customOrientation = orientation
+        }
+    }
+
 
     companion object {
 
@@ -265,5 +283,8 @@ class PreviewCamera(private val bridge: Bridge) {
             return availableCameras
         }
     }
+}
 
+fun Float.isBetween(a: Double, b: Double): Boolean {
+    return a <= this && this <= b
 }
