@@ -32,6 +32,7 @@ export interface PreviewCameraPlugin {
   maxAvailableZoom(): Promise<{ result: number }>;
   zoom(options: { factor: number }): Promise<void>;
   setQuality(options: { quality: 'low' | 'hq' }): Promise<void>;
+  saveFileToUserDevice(options: { filePath: string }): Promise<void>;
   addListener(
     eventName: 'captureVideoFinished',
     listenerFunc: (data: CaptureResult) => void,
@@ -42,7 +43,7 @@ export interface PreviewCameraPlugin {
   ): Promise<PluginListenerHandle> & PluginListenerHandle;
   addListener(
     eventName: 'accelerometerOrientation',
-    listenerFunc: (data: {orientation: CustomOrientation}) => void,
+    listenerFunc: (data: { orientation: CustomOrientation }) => void,
   ): Promise<PluginListenerHandle> & PluginListenerHandle;
   removeAllListeners(): Promise<void>;
 }

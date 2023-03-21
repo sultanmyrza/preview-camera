@@ -31,6 +31,7 @@ npx cap sync
 * [`maxAvailableZoom()`](#maxavailablezoom)
 * [`zoom(...)`](#zoom)
 * [`setQuality(...)`](#setquality)
+* [`saveFileToUserDevice(...)`](#savefiletouserdevice)
 * [`addListener('captureVideoFinished', ...)`](#addlistenercapturevideofinished)
 * [`addListener('capturePhotoFinished', ...)`](#addlistenercapturephotofinished)
 * [`addListener('accelerometerOrientation', ...)`](#addlisteneraccelerometerorientation)
@@ -233,6 +234,19 @@ setQuality(options: { quality: 'low' | 'hq'; }) => Promise<void>
 | Param         | Type                                     |
 | ------------- | ---------------------------------------- |
 | **`options`** | <code>{ quality: 'low' \| 'hq'; }</code> |
+
+--------------------
+
+
+### saveFileToUserDevice(...)
+
+```typescript
+saveFileToUserDevice(options: { filePath: string; }) => Promise<void>
+```
+
+| Param         | Type                               |
+| ------------- | ---------------------------------- |
+| **`options`** | <code>{ filePath: string; }</code> |
 
 --------------------
 
