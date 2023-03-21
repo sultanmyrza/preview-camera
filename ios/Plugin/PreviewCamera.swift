@@ -2,6 +2,7 @@ import Foundation
 import UIKit
 import Capacitor
 import AVFoundation
+import MobileCoreServices
 
 typealias CapacitorNotifyListeners = (_ eventName: String, _ data: [String : Any?]?) -> Void
 
@@ -394,6 +395,71 @@ enum CaptureQuality {
         } else {
             captureQuality = .hq
             session.sessionPreset = .high
+        }
+    }
+    
+    public func saveFileToUserDevice(_ filePath: String) {
+        guard let fileExtension = URL(fileURLWithPath: filePath).pathExtension as CFString?,
+              let fileType = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, fileExtension, nil)?.takeRetainedValue() else {
+            print("Unable to determine file type.")
+            return
+        }
+        // Remove `file://` prefix if any
+        let filePathClean = filePath.replacingOccurrences(of: "file://", with: "")
+        if UTTypeConformsTo(fileType, kUTTypeImage) {
+            saveImageToPhotoAlbum(filePathClean)
+        } else if UTTypeConformsTo(fileType, kUTTypeMovie) {
+            saveVideoToPhotoAlbum(videoPath: filePathClean)
+        } else {
+            print("File type is neither image nor video.")
+        }
+    }
+    
+    
+    public func saveImageToPhotoAlbum(_ filePath: String) {
+        // Load image from the file path
+        if let image = UIImage(contentsOfFile: filePath) {
+            // Save image to the Photo Album
+            UIImageWriteToSavedPhotosAlbum(image, self, #selector(imageSavedToPhotosAlbum(_:didFinishSavingWithError:contextInfo:)), nil)
+        } else {
+            print("Error: Failed to load image from file path")
+        }
+//
+//        do {
+//            let imageUrl = URL(fileURLWithPath: filePath)
+//            let imageData = try Data(contentsOf: imageUrl)
+//            guard let image = UIImage(data: imageData) else {
+//                print("Unable to create UIImage from data.")
+//                return
+//            }
+//            UIImageWriteToSavedPhotosAlbum(image, self, #selector(imageSavedToPhotosAlbum(_:didFinishSavingWithError:contextInfo:)), nil)
+//        } catch {
+//            print("Error reading image data: \(error.localizedDescription)")
+//        }
+    }
+    
+    @objc func imageSavedToPhotosAlbum(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
+        // Check for errors
+        if let error = error {
+            print("Error: Failed to save image - \(error.localizedDescription)")
+        } else {
+            print("Success: Image saved to Photo Album")
+        }
+    }
+    
+    func saveVideoToPhotoAlbum(videoPath: String) {
+        if UIVideoAtPathIsCompatibleWithSavedPhotosAlbum(videoPath) {
+            UISaveVideoAtPathToSavedPhotosAlbum(videoPath, self, #selector(videoSavedToPhotosAlbum(_:didFinishSavingWithError:contextInfo:)), nil)
+        } else {
+            print("Video is not compatible with the Photos Album.")
+        }
+    }
+    
+    @objc func videoSavedToPhotosAlbum(_ videoPath: NSString, didFinishSavingWithError error: NSError?, contextInfo: UnsafeRawPointer) {
+        if let error = error {
+            print("Error saving video: \(error.localizedDescription)")
+        } else {
+            print("Video saved to Photos Album.")
         }
     }
 
