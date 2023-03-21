@@ -1,22 +1,32 @@
 package io.numbersprotocol.capturelite.plugins.previewcamera
 
 import android.annotation.SuppressLint
+import android.content.ContentResolver
+import android.content.ContentValues
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.ImageFormat
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.hardware.camera2.CameraMetadata
+import android.net.Uri
+import android.provider.MediaStore
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.Surface
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.MimeTypeMap
 import android.widget.FrameLayout
 import androidx.camera.core.ImageCapture
 import com.getcapacitor.Bridge
 import com.getcapacitor.JSObject
 import com.getcapacitor.PluginCall
+import java.io.FileInputStream
+import java.io.IOException
+import java.io.OutputStream
 
 
 typealias CapacitorNotifyListener = (String, JSObject) -> Unit
@@ -197,6 +207,89 @@ class PreviewCamera(private val bridge: Bridge) {
 //            previewCameraFragment?.bindCameraUseCases(orientation)
             Log.d("Custom Orientation", newCustomOrientation)
             previewCameraFragment?.customOrientation = orientation
+        }
+    }
+
+    fun saveFileToUserDevice(context: Context, filePath: String) {
+        val extension = filePath.substringAfterLast(".", "")
+        val mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
+        val absoluteFilePath = filePath.replace("file:", "")
+        if (mimeType?.startsWith("image/") == true) {
+            savePhotoToGallery(context, absoluteFilePath)
+        }
+        if (mimeType?.startsWith("video/") == true) {
+            saveVideoToGallery(context, absoluteFilePath)
+        }
+    }
+
+    private fun savePhotoToGallery(context: Context, absoluteFilePath: String) {
+        val resolver: ContentResolver = context.contentResolver
+
+        val fileName = absoluteFilePath.split("/").last()
+
+        // Create a bitmap from the file path
+        val bitmap = BitmapFactory.decodeFile(absoluteFilePath)
+
+        // Prepare the ContentValues for inserting the image
+        val contentValues = ContentValues().apply {
+            put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+            put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
+            put(MediaStore.MediaColumns.RELATIVE_PATH, "DCIM/Capture")
+        }
+
+        // Insert the image
+        val imageUri: Uri? =
+            resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+
+        // Save the image to the gallery
+        imageUri?.let { uri ->
+            val outputStream: OutputStream? = resolver.openOutputStream(uri)
+            outputStream?.use {
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, it)
+            }
+        } ?: run {
+            println("Error: Failed to insert image")
+        }
+    }
+
+    /**
+     * This function first prepares ContentValues to insert the video with the required metadata,
+     * such as display name, MIME type, and relative path within the "Movies" folder.
+     * The resolver.insert() method is called to insert the video, and the returned Uri is used to
+     * open an OutputStream to save the video to the Gallery. The copyFile() function is used to copy
+     * the video from the source path to the output stream.
+     */
+    private fun saveVideoToGallery(context: Context, absoluteFilePath: String) {
+        val resolver: ContentResolver = context.contentResolver
+
+        val fileName = absoluteFilePath.split("/").last()
+
+        // Prepare the ContentValues for inserting the video
+        val contentValues = ContentValues().apply {
+            put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+            put(MediaStore.MediaColumns.MIME_TYPE, "video/mp4")
+            put(MediaStore.MediaColumns.RELATIVE_PATH, "Movies/Capture")
+        }
+
+        // Insert the video
+        val videoUri: Uri? =
+            resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues)
+
+        // Save the video to the gallery
+        videoUri?.let { uri ->
+            val outputStream: OutputStream? = resolver.openOutputStream(uri)
+            copyFile(absoluteFilePath, outputStream)
+        } ?: run {
+            println("Error: Failed to insert video")
+        }
+    }
+
+    @Throws(IOException::class)
+    fun copyFile(sourcePath: String, outputStream: OutputStream?) {
+        FileInputStream(sourcePath).use { inputStream ->
+            outputStream?.use { output ->
+                inputStream.copyTo(output)
+            }
         }
     }
 
