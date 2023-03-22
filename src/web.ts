@@ -63,4 +63,7 @@ export class PreviewCameraWeb extends WebPlugin implements PreviewCameraPlugin {
   setQuality(_: { quality: 'low' | 'hq' }): Promise<void> {
     throw new Error('Method not implemented.');
   }
+  saveFileToUserDevice(_options: { filePath: string }): Promise<void> {
+    throw new Error('Method not implemented.');
+  }
 }

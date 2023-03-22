@@ -340,6 +340,14 @@ public class PreviewCameraPlugin: CAPPlugin {
         self.previewCamera?.setQuality(quality)
         call.resolve()
     }
+    
+    @objc func saveFileToUserDevice(_ call: CAPPluginCall) {
+        guard let filePath = call.getString("filePath") else {
+            return call.resolve()
+        }
+        self.previewCamera?.saveFileToUserDevice(filePath)
+        call.resolve()
+    }
 
     // MARK: - Helper methods
     func checkUsageDescriptions() -> String? {

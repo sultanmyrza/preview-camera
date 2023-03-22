@@ -100,6 +100,14 @@ class PreviewCameraPlugin : Plugin(), SensorEventListener {
         }
     }
 
+    @PluginMethod
+    fun saveFileToUserDevice(call: PluginCall) {
+        val filePath = call.getString("filePath") ?: return call.resolve()
+        implementation.saveFileToUserDevice(context, filePath)
+        call.resolve()
+
+    }
+
     private fun startAccelerometerBroadcast() {
         val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
         sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI)
