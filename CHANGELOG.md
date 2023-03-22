@@ -1,4 +1,11 @@
 # Changelog
+
+## 0.0.12 - 2023-03-22
+
+### Added
+
+- Feature to save media to user device. (#18)
+
 ## 0.0.11 - 2022-12-17
 
 ### Added
