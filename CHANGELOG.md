@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.13 - 2023-03-30
+
+### Fixed
+
+- Fixed save media to user device for Android platform (#19).
+
 ## 0.0.12 - 2023-03-22
 
 ### Added
