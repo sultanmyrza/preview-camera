@@ -12,6 +12,7 @@ import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.hardware.camera2.CameraMetadata
 import android.net.Uri
+import android.os.Build
 import android.provider.MediaStore
 import android.util.DisplayMetrics
 import android.util.Log
@@ -24,9 +25,11 @@ import androidx.camera.core.ImageCapture
 import com.getcapacitor.Bridge
 import com.getcapacitor.JSObject
 import com.getcapacitor.PluginCall
+import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
 import java.io.OutputStream
+import java.net.URI
 
 
 typealias CapacitorNotifyListener = (String, JSObject) -> Unit
@@ -213,7 +216,7 @@ class PreviewCamera(private val bridge: Bridge) {
     fun saveFileToUserDevice(context: Context, filePath: String) {
         val extension = filePath.substringAfterLast(".", "")
         val mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
-        val absoluteFilePath = filePath.replace("file:", "")
+        val absoluteFilePath = File(URI(filePath)).absolutePath
         if (mimeType?.startsWith("image/") == true) {
             savePhotoToGallery(context, absoluteFilePath)
         }
@@ -234,7 +237,9 @@ class PreviewCamera(private val bridge: Bridge) {
         val contentValues = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
             put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
-            put(MediaStore.MediaColumns.RELATIVE_PATH, "DCIM/Capture")
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                put(MediaStore.MediaColumns.RELATIVE_PATH, "DCIM/${getAppName(context)}")
+            }
         }
 
         // Insert the image
@@ -268,7 +273,9 @@ class PreviewCamera(private val bridge: Bridge) {
         val contentValues = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
             put(MediaStore.MediaColumns.MIME_TYPE, "video/mp4")
-            put(MediaStore.MediaColumns.RELATIVE_PATH, "Movies/Capture")
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                put(MediaStore.MediaColumns.RELATIVE_PATH, "DCIM/${getAppName(context)}")
+            }
         }
 
         // Insert the video
@@ -282,6 +289,12 @@ class PreviewCamera(private val bridge: Bridge) {
         } ?: run {
             println("Error: Failed to insert video")
         }
+    }
+
+    fun getAppName(context: Context): String {
+        val packageManager = context.packageManager
+        val applicationInfo = context.applicationInfo
+        return packageManager.getApplicationLabel(applicationInfo).toString()
     }
 
     @Throws(IOException::class)
