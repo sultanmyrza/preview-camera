@@ -1,6 +1,6 @@
 import { WebPlugin } from '@capacitor/core';
 
-import type { PreviewCameraPlugin } from './definitions';
+import type { PermissionStatus, PreviewCameraPlugin } from './definitions';
 
 export class PreviewCameraWeb extends WebPlugin implements PreviewCameraPlugin {
   async echo(options: { value: string }): Promise<{ value: string }> {
@@ -64,6 +64,12 @@ export class PreviewCameraWeb extends WebPlugin implements PreviewCameraPlugin {
     throw new Error('Method not implemented.');
   }
   saveFileToUserDevice(_options: { filePath: string }): Promise<void> {
+    throw new Error('Method not implemented.');
+  }
+  checkPermissions(): Promise<PermissionStatus> {
+    throw new Error('Method not implemented.');
+  }
+  requestPermissions(): Promise<PermissionStatus> {
     throw new Error('Method not implemented.');
   }
 }
