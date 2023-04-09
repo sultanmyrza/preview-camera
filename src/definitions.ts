@@ -1,4 +1,4 @@
-import type { PluginListenerHandle } from '@capacitor/core';
+import type { PermissionState, PluginListenerHandle } from '@capacitor/core';
 
 export interface CaptureResult {
   /** File path for photo or video taken by camera. Example: file://your-app-dir/.../my-video.mp4 */
@@ -12,6 +12,15 @@ export type CustomOrientation =
   | 'portraitDown'
   | 'landscapeRight'
   | 'landscaperLeft';
+
+/**
+ * - `camera` permission allows to take photo and record video without audio.
+ * - `microphone` permission allows to record video with audio.
+ */
+export interface PermissionStatus {
+  camera: PermissionState;
+  microphone: PermissionState;
+}
 
 export interface PreviewCameraPlugin {
   echo(options: { value: string }): Promise<{ value: string }>;
@@ -33,6 +42,8 @@ export interface PreviewCameraPlugin {
   zoom(options: { factor: number }): Promise<void>;
   setQuality(options: { quality: 'low' | 'hq' }): Promise<void>;
   saveFileToUserDevice(options: { filePath: string }): Promise<void>;
+  checkPermissions(): Promise<PermissionStatus>;
+  requestPermissions(): Promise<PermissionStatus>;
   addListener(
     eventName: 'captureVideoFinished',
     listenerFunc: (data: CaptureResult) => void,

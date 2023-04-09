@@ -32,6 +32,8 @@ npx cap sync
 * [`zoom(...)`](#zoom)
 * [`setQuality(...)`](#setquality)
 * [`saveFileToUserDevice(...)`](#savefiletouserdevice)
+* [`checkPermissions()`](#checkpermissions)
+* [`requestPermissions()`](#requestpermissions)
 * [`addListener('captureVideoFinished', ...)`](#addlistenercapturevideofinished)
 * [`addListener('capturePhotoFinished', ...)`](#addlistenercapturephotofinished)
 * [`addListener('accelerometerOrientation', ...)`](#addlisteneraccelerometerorientation)
@@ -251,6 +253,28 @@ saveFileToUserDevice(options: { filePath: string; }) => Promise<void>
 --------------------
 
 
+### checkPermissions()
+
+```typescript
+checkPermissions() => Promise<PermissionStatus>
+```
+
+**Returns:** <code>Promise&lt;<a href="#permissionstatus">PermissionStatus</a>&gt;</code>
+
+--------------------
+
+
+### requestPermissions()
+
+```typescript
+requestPermissions() => Promise<PermissionStatus>
+```
+
+**Returns:** <code>Promise&lt;<a href="#permissionstatus">PermissionStatus</a>&gt;</code>
+
+--------------------
+
+
 ### addListener('captureVideoFinished', ...)
 
 ```typescript
@@ -311,6 +335,17 @@ removeAllListeners() => Promise<void>
 ### Interfaces
 
 
+#### PermissionStatus
+
+- `camera` permission allows to take photo and record video without audio.
+- `microphone` permission allows to record video with audio.
+
+| Prop             | Type                                                        |
+| ---------------- | ----------------------------------------------------------- |
+| **`camera`**     | <code><a href="#permissionstate">PermissionState</a></code> |
+| **`microphone`** | <code><a href="#permissionstate">PermissionState</a></code> |
+
+
 #### PluginListenerHandle
 
 | Prop         | Type                                      |
@@ -327,6 +362,11 @@ removeAllListeners() => Promise<void>
 
 
 ### Type Aliases
+
+
+#### PermissionState
+
+<code>'prompt' | 'prompt-with-rationale' | 'granted' | 'denied'</code>
 
 
 #### CustomOrientation

@@ -38,34 +38,22 @@ public class PreviewCameraPlugin: CAPPlugin {
 
     @objc override public func checkPermissions(_ call: CAPPluginCall) {
         var result: [String: Any] = [:]
-        for permission in CameraPermissionType.allCases {
-            let state: String
-            switch permission {
-            case .camera:
-                state = AVCaptureDevice.authorizationStatus(for: .video).authorizationState
-            }
-            result[permission.rawValue] = state
-        }
+        let cameraPermissionState = AVCaptureDevice.authorizationStatus(for: .video).authorizationState
+        let microphonePermissionState = AVCaptureDevice.authorizationStatus(for: .audio).authorizationState
+        result["camera"] = cameraPermissionState
+        result["microphone"] = microphonePermissionState
         call.resolve(result)
     }
 
     @objc override public func requestPermissions(_ call: CAPPluginCall) {
-        // get the list of desired types, if passes
-        let typeList = call.getArray("permissions", String.self)?.compactMap({ (type) -> CameraPermissionType? in
-            return CameraPermissionType(rawValue: type)
-        }) ?? []
-        // otherwise check everything
-        let permissions: [CameraPermissionType] = (typeList.count > 0) ? typeList : CameraPermissionType.allCases
-        // request the permissions
         let group = DispatchGroup()
-        for permission in permissions {
-            switch permission {
-            case .camera:
-                group.enter()
-                AVCaptureDevice.requestAccess(for: .video) { _ in
-                    group.leave()
-                }
-            }
+        group.enter()
+        AVCaptureDevice.requestAccess(for: .video) { _ in
+            group.leave()
+        }
+        group.enter()
+        AVCaptureDevice.requestAccess(for: .audio) { _ in
+            group.leave()
         }
         group.notify(queue: DispatchQueue.main) { [weak self] in
             self?.checkPermissions(call)

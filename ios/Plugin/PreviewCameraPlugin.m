@@ -22,4 +22,6 @@ CAP_PLUGIN(PreviewCameraPlugin, "PreviewCamera",
            CAP_PLUGIN_METHOD(zoom, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(setQuality, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(saveFileToUserDevice, CAPPluginReturnPromise);
+           CAP_PLUGIN_METHOD(checkPermissions, CAPPluginReturnPromise);
+           CAP_PLUGIN_METHOD(requestPermissions, CAPPluginReturnPromise);
 )
