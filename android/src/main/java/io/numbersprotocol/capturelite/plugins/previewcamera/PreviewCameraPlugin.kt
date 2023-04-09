@@ -6,12 +6,10 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import android.util.Log
 import com.getcapacitor.*
 import com.getcapacitor.annotation.CapacitorPlugin
 import com.getcapacitor.annotation.Permission
 import com.getcapacitor.annotation.PermissionCallback
-import kotlin.math.abs
 import kotlin.math.atan2
 
 
@@ -31,7 +29,10 @@ import kotlin.math.atan2
 class PreviewCameraPlugin : Plugin(), SensorEventListener {
 
     companion object {
+        // FIXME: rename cameraPermissionAlias to camera
         const val CAMERA_PERMISSION_ALIAS = "cameraPermissionAlias"
+
+        // FIXME: rename cameraPermissionAlias to microphone
         const val RECORD_AUDIO_PERMISSION_ALIAS = "recordAudioPermissionAlias"
     }
 
@@ -99,6 +100,35 @@ class PreviewCameraPlugin : Plugin(), SensorEventListener {
             // requestPermissionForAlias(RECORD_AUDIO_PERMISSION_ALIAS, call, "handleRecordAudioPermissionResult")
         }
     }
+
+    @PluginMethod
+    override fun checkPermissions(call: PluginCall) {
+        val cameraPermissionState = getPermissionState(CAMERA_PERMISSION_ALIAS)
+        val microphonePermissionState = getPermissionState(RECORD_AUDIO_PERMISSION_ALIAS)
+
+        val result = JSObject()
+        result.put("camera", cameraPermissionState)
+        result.put("microphone", microphonePermissionState)
+        call.resolve(result)
+    }
+
+    @PluginMethod
+    override fun requestPermissions(call: PluginCall) {
+        requestAllPermissions(call, "requestAllPermissionsCallback")
+    }
+
+    @PermissionCallback
+    fun requestAllPermissionsCallback(call: PluginCall) {
+        val cameraPermissionState = getPermissionState(CAMERA_PERMISSION_ALIAS)
+        val microphonePermissionState = getPermissionState(RECORD_AUDIO_PERMISSION_ALIAS)
+
+        val result = JSObject()
+        result.put("camera", cameraPermissionState)
+        result.put("microphone", microphonePermissionState)
+        call.resolve(result)
+    }
+
+
 
     @PluginMethod
     fun saveFileToUserDevice(call: PluginCall) {
