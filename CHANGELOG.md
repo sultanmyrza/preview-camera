@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.14 - 2023-04-09
+
+### Added
+
+- Feature to handle camera and microphone permissions (#20)
+
 ## 0.0.13 - 2023-03-30
 
 ### Fixed
@@ -50,7 +56,7 @@
 
 ## 0.0.1 - 2022-03-02
 
-### Added 
+### Added
 
 - Take photo feature
 - Record video feature
