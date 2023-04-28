@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.0.15 - 2023-04-28
+
+### Fixed
+
+- Fix android flip camera crashes the app (#22)
+- Fix android on sensor changed NumberFormatException (#21)
+
 ## 0.0.14 - 2023-04-09
 
 ### Added
