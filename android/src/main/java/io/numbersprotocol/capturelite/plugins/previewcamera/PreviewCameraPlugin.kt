@@ -11,6 +11,7 @@ import com.getcapacitor.annotation.CapacitorPlugin
 import com.getcapacitor.annotation.Permission
 import com.getcapacitor.annotation.PermissionCallback
 import kotlin.math.atan2
+import kotlin.math.round
 
 
 @CapacitorPlugin(
@@ -127,7 +128,6 @@ class PreviewCameraPlugin : Plugin(), SensorEventListener {
         result.put("microphone", microphonePermissionState)
         call.resolve(result)
     }
-
 
 
     @PluginMethod
@@ -257,7 +257,7 @@ class PreviewCameraPlugin : Plugin(), SensorEventListener {
         if (sensorEvent?.sensor?.type == Sensor.TYPE_ACCELEROMETER) {
             val (accelerationX, accelerationY, accelerationZ) = sensorEvent.values
             val preciseInclinationInRad = atan2(accelerationY, accelerationX)
-            val inclinationRad = String.format("%.1f", preciseInclinationInRad).toFloat()
+            val inclinationRad = round(preciseInclinationInRad * 10) / 10
 
             var newCustomOrientation = "portraitUp"
             if (inclinationRad.isBetween(0.6, 2.2))
