@@ -14,7 +14,6 @@ import android.hardware.camera2.CameraMetadata
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
-import android.util.DisplayMetrics
 import android.util.Log
 import android.view.Surface
 import android.view.View
@@ -83,8 +82,6 @@ class PreviewCamera(private val bridge: Bridge) {
 
                 // TODO: uncomment if camera is not showing
                 // Get Screen Width, Height and set PreviewWrapper stretch to max width and height
-                val displayMetrics = DisplayMetrics()
-                bridge.activity.windowManager.defaultDisplay.getMetrics(displayMetrics)
 
                 previewLayerWrapper!!.layoutParams = FrameLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
@@ -94,7 +91,8 @@ class PreviewCamera(private val bridge: Bridge) {
 
             (bridge.webView.parent as ViewGroup).addView(previewLayerWrapper)
             bridge.webView.bringToFront();
-            hideWebViewBackground()
+            bridge.webView.setBackgroundColor(Color.TRANSPARENT)
+//            hideWebViewBackground()
 
             val fragmentManger = bridge.activity.supportFragmentManager
             val fragmentTransaction = fragmentManger.beginTransaction()
@@ -124,7 +122,7 @@ class PreviewCamera(private val bridge: Bridge) {
 
             }
 
-            showWebViewBackground()
+             showWebViewBackground()
 
             call.resolve()
         }
@@ -167,7 +165,7 @@ class PreviewCamera(private val bridge: Bridge) {
     private fun showWebViewBackground() {
         bridge.activity
             .runOnUiThread {
-                bridge.webView.setBackgroundColor(Color.WHITE)
+                bridge.webView.setBackgroundColor(Color.BLACK)
                 bridge.webView
                     .loadUrl("javascript:document.documentElement.style.backgroundColor = '';void(0);")
                 // isBackgroundHidden = false
