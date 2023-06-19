@@ -123,19 +123,37 @@ enum CaptureQuality {
 
     // AVCapturePhotoCaptureDelegate method for AVCapturePhotoOutput.capturePhoto
     public func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
-        guard let data = photo.fileDataRepresentation() else {
-            self.capturePhotoFinished(errorMessage: "The photo and attachment data cannot be flattened.")
+        if let error = error {
+            let errorResult = CaptureErrorResult(errorMessage: error.localizedDescription)
+            
+            notifyListeners("captureErrorResult", errorResult.toJSObject())
             return
         }
-        let sizeInMB = ByteCountFormatter.string(fromByteCount: Int64(data.count), countStyle: .file)
+        
+        guard let data = photo.fileDataRepresentation() else {
+            let errorResult = CaptureErrorResult(errorMessage: "The photo and attachment data cannot be flattened.")
+            
+            notifyListeners("captureErrorResult", errorResult.toJSObject())
+            return
+        }
+        
         let filePath = createFile(FILENAME_FORMAT, PHOTO_EXTENSION)
         
         do {
             try data.write(to: filePath)
-            self.capturePhotoFinished(filePath)
+            let successResult = CaptureSuccessResult(
+                name: filePath.lastPathComponent,
+                path: filePath.absoluteString,
+                size: data.count,
+                mimeType: "image/jpeg")
+            
+            notifyListeners("captureSuccessResult", successResult.toJSObject())
         } catch {
-            self.capturePhotoFinished(errorMessage: error.localizedDescription)
+            let errorResult = CaptureErrorResult(errorMessage: error.localizedDescription)
+            
+            notifyListeners("captureErrorResult", errorResult.toJSObject())
         }
+        
     }
     
     public func startRecord() throws {
@@ -178,20 +196,19 @@ enum CaptureQuality {
     
     // AVCaptureFileOutputRecordingDelegate method for AVCaptureMovieFileOutput.startRecording
     public func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
-        
-        var success = true
-        
-        if error != nil {
-            success = false
-//            success = (((error! as NSError).userInfo[AVErrorRecordingSuccessfullyFinishedKey] as AnyObject).boolValue)!
-            let errorMessage = "Movie file finishing error: \(String(describing: error))"
-            self.captureVideoFinished(errorMessage: errorMessage)
-        }
-        
-        let videoSizeInMB = ByteCountFormatter.string(fromByteCount: output.recordedFileSize, countStyle: .file)
-        
-        if success {
-            self.captureVideoFinished(outputFileURL)
+        if let error = error {
+            let errorMessage = "Movie file finishing error: \(error)"
+            let errorResult = CaptureErrorResult(errorMessage: errorMessage)
+            
+            notifyListeners("captureErrorResult", errorResult.toJSObject())
+        } else {
+            let successResult = CaptureSuccessResult(
+                name: outputFileURL.lastPathComponent,
+                path: outputFileURL.absoluteString,
+                size: Int(output.recordedFileSize),
+                mimeType: "video/mp4")
+            
+            notifyListeners("captureSuccessResult", successResult.toJSObject())
         }
     }
 
@@ -678,10 +695,6 @@ private func setupCamera() throws {
         return filePath
     }
     
-    private func capturePhotoFinished(_ filePath: URL? = nil, errorMessage: String? = nil) {
-        notifyListeners("capturePhotoFinished", ["filePath": filePath?.absoluteString, "errorMessage": errorMessage])
-        
-    }
     
     private func captureVideoFinished(_ filePath: URL? = nil, errorMessage: String? = nil) {
         
@@ -802,5 +815,31 @@ private func setupCamera() throws {
         }
         
         return true
+    }
+}
+
+struct CaptureSuccessResult {
+    let name: String
+    let path: String
+    let size: Int
+    let mimeType: String
+    
+    func toJSObject() -> JSObject {
+        var json = JSObject()
+        json["name"] = name
+        json["path"] = path
+        json["size"] = size
+        json["mimeType"] = mimeType
+        return json
+    }
+}
+
+struct CaptureErrorResult {
+    let errorMessage: String
+    
+    func toJSObject() -> JSObject {
+        var jsObject = JSObject()
+        jsObject["errorMessage"] = errorMessage
+        return jsObject
     }
 }
