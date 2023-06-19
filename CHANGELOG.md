@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.0.16 - 2023-06-19
+
+### Added
+
+- Introduce Capture Success Result and Capture Error Result API
+- Implement Capture Success/Error Result for Android
+- Implement Capture Success/Error Result for iOS
+
 ## 0.0.15 - 2023-04-28
 
 ### Fixed
