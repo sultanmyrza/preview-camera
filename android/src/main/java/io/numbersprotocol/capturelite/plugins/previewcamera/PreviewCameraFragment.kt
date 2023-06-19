@@ -284,28 +284,26 @@ class PreviewCameraFragment : Fragment() {
                     override fun onError(exc: ImageCaptureException) {
                         Log.e(TAG, "Photo capture failed: ${exc.message}", exc)
 
-                        val data = JSObject().apply {
-                            put("filePath", null)
-                            put("errorMessage", "Photo capture failed: ${exc.message}")
-                        }
+                        val data = CaptureErrorResult("Photo capture failed: ${exc.message}")
+                            .toJSObject()
 
-                        notifyListener("capturePhotoFinished", data)
+                        notifyListener("captureErrorResult", data)
                     }
 
                     override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                         val savedUri = output.savedUri
                         Log.d(TAG, "Photo capture succeeded: $savedUri")
-                        output.savedUri
 
                         val file = File(savedUri?.path)
-                        val fileSize = file.length() / 1024
 
-                        val data = JSObject().apply {
-                            put("filePath", savedUri)
-                            put("errorMessage", null)
-                        }
+                        val data = CaptureSuccessResult(
+                            file.name,
+                            output.savedUri.toString(),
+                            file.length(),
+                            "image/jpeg",
+                        ).toJSObject()
 
-                        notifyListener("capturePhotoFinished", data)
+                        notifyListener("captureSuccessResult", data)
                     }
                 })
         }
@@ -345,7 +343,7 @@ class PreviewCameraFragment : Fragment() {
         try {
             Log.d("Custom Orientation", "capture with $customOrientation")
 
-            if(customOrientation == Surface.ROTATION_0 || customOrientation == Surface.ROTATION_180) {
+            if (customOrientation == Surface.ROTATION_0 || customOrientation == Surface.ROTATION_180) {
                 videoCapture?.targetRotation = Surface.ROTATION_0
             } else if (customOrientation == Surface.ROTATION_270) {
                 videoCapture?.targetRotation = Surface.ROTATION_90
@@ -386,6 +384,7 @@ class PreviewCameraFragment : Fragment() {
                             }
                             // call.resolve(data) // TODO: notify instead off resolve
                         }
+
                         is VideoRecordEvent.Finalize -> {
                             // showUI(UiState.FINALIZED, recordEvent.getNameString())
                             if (!recordEvent.hasError()) {
@@ -395,34 +394,32 @@ class PreviewCameraFragment : Fragment() {
                                 Log.d(TAG, msg)
 
                                 val file = File(outputUri?.path)
-                                val fileSize = file.length() / 1024
 
-                                val data = JSObject().apply {
-                                    put("errorMessage", null)
-                                    put("filePath", outputUri)
-                                }
-                                notifyListeners("captureVideoFinished", data)
+                                val data = CaptureSuccessResult(
+                                    file.name,
+                                    outputUri.toString(), // can be outputUri?
+                                    file.length(),
+                                    "video/mp4"
+                                ).toJSObject()
+                                notifyListeners("captureSuccessResult", data)
                             } else {
                                 recording?.close()
                                 recording = null
 
-                                val msg = "Video capture ends with error: ${recordEvent.error}"
-                                Log.e(TAG, msg)
+                                val errorMsg = "Video capture ends with error: ${recordEvent.error}"
+                                val data = CaptureErrorResult(errorMsg).toJSObject();
 
-                                val data = JSObject().apply {
-                                    put("errorMessage", msg)
-                                    put("filePath", null)
-                                }
-
-                                notifyListeners("captureVideoFinished", data)
+                                notifyListeners("captureErrorResult", data)
                             }
                         }
+
                         is VideoRecordEvent.Pause -> {
                             // fragmentCameraBinding.captureButton.setImageResource(R.drawable.ic_resume)
                             // TODO: notify ionic side
                             val msg = "VideoRecordEvent.Pause"
                             Log.e(TAG, msg)
                         }
+
                         is VideoRecordEvent.Resume -> {
                             // fragmentCameraBinding.captureButton.setImageResource(R.drawable.ic_pause)
                             // TODO: notify ionic side
@@ -590,14 +587,17 @@ class PreviewCameraFragment : Fragment() {
                     Quality.UHD -> {
                         Log.e(TAG, "Supported quality: Ultra High Definition (UHD) - 2160p")
                     }
+
                     Quality.FHD -> {
                         //Add "Full High Definition (FHD) - 1080p" to the list
                         Log.e(TAG, "Supported quality: Full High Definition (FHD) - 1080p")
                     }
+
                     Quality.HD -> {
                         //Add "High Definition (HD) - 720p" to the list
                         Log.e(TAG, "Supported quality: High Definition (HD) - 720p")
                     }
+
                     Quality.SD -> {
                         //Add "Standard Definition (SD) - 480p" to the list
                         Log.e(TAG, "Supported quality: Standard Definition (SD) - 480p")
@@ -667,6 +667,7 @@ class PreviewCameraFragment : Fragment() {
 //                            Toast.LENGTH_SHORT
 //                        ).show()
                     }
+
                     CameraState.Type.OPENING -> {
                         // Show the Camera UI
 //                        Toast.makeText(
@@ -675,6 +676,7 @@ class PreviewCameraFragment : Fragment() {
 //                            Toast.LENGTH_SHORT
 //                        ).show()
                     }
+
                     CameraState.Type.OPEN -> {
                         // Setup Camera resources and begin processing
 //                        Toast.makeText(
@@ -683,6 +685,7 @@ class PreviewCameraFragment : Fragment() {
 //                            Toast.LENGTH_SHORT
 //                        ).show()
                     }
+
                     CameraState.Type.CLOSING -> {
                         // Close camera UI
 //                        Toast.makeText(
@@ -691,6 +694,7 @@ class PreviewCameraFragment : Fragment() {
 //                            Toast.LENGTH_SHORT
 //                        ).show()
                     }
+
                     CameraState.Type.CLOSED -> {
                         // Free camera resources
 //                        Toast.makeText(
@@ -723,6 +727,7 @@ class PreviewCameraFragment : Fragment() {
 //                            Toast.LENGTH_SHORT
 //                        ).show()
                     }
+
                     CameraState.ERROR_MAX_CAMERAS_IN_USE -> {
                         // Close another open camera in the app, or ask the user to close another
                         // camera app that's using the camera
@@ -732,6 +737,7 @@ class PreviewCameraFragment : Fragment() {
 //                            Toast.LENGTH_SHORT
 //                        ).show()
                     }
+
                     CameraState.ERROR_OTHER_RECOVERABLE_ERROR -> {
 //                        Toast.makeText(
 //                            context,
@@ -748,6 +754,7 @@ class PreviewCameraFragment : Fragment() {
 //                            Toast.LENGTH_SHORT
 //                        ).show()
                     }
+
                     CameraState.ERROR_CAMERA_FATAL_ERROR -> {
                         // Ask the user to reboot the device to restore camera function
 //                        Toast.makeText(

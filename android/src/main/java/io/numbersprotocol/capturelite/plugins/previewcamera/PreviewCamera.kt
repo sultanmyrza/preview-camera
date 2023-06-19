@@ -14,7 +14,6 @@ import android.hardware.camera2.CameraMetadata
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
-import android.util.DisplayMetrics
 import android.util.Log
 import android.view.Surface
 import android.view.View
@@ -25,6 +24,7 @@ import androidx.camera.core.ImageCapture
 import com.getcapacitor.Bridge
 import com.getcapacitor.JSObject
 import com.getcapacitor.PluginCall
+import org.json.JSONObject
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
@@ -83,8 +83,6 @@ class PreviewCamera(private val bridge: Bridge) {
 
                 // TODO: uncomment if camera is not showing
                 // Get Screen Width, Height and set PreviewWrapper stretch to max width and height
-                val displayMetrics = DisplayMetrics()
-                bridge.activity.windowManager.defaultDisplay.getMetrics(displayMetrics)
 
                 previewLayerWrapper!!.layoutParams = FrameLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
@@ -94,7 +92,8 @@ class PreviewCamera(private val bridge: Bridge) {
 
             (bridge.webView.parent as ViewGroup).addView(previewLayerWrapper)
             bridge.webView.bringToFront();
-            hideWebViewBackground()
+            bridge.webView.setBackgroundColor(Color.TRANSPARENT)
+//            hideWebViewBackground()
 
             val fragmentManger = bridge.activity.supportFragmentManager
             val fragmentTransaction = fragmentManger.beginTransaction()
@@ -167,7 +166,7 @@ class PreviewCamera(private val bridge: Bridge) {
     private fun showWebViewBackground() {
         bridge.activity
             .runOnUiThread {
-                bridge.webView.setBackgroundColor(Color.WHITE)
+                bridge.webView.setBackgroundColor(Color.BLACK)
                 bridge.webView
                     .loadUrl("javascript:document.documentElement.style.backgroundColor = '';void(0);")
                 // isBackgroundHidden = false
@@ -393,4 +392,30 @@ class PreviewCamera(private val bridge: Bridge) {
 
 fun Float.isBetween(a: Double, b: Double): Boolean {
     return a <= this && this <= b
+}
+
+
+data class CaptureSuccessResult(
+    val name: String,
+    val path: String,
+    val size: Long,
+    val mimeType: String
+) {
+    fun toJSObject(): JSObject {
+        val json = JSObject()
+        json.put("name", name)
+        json.put("path", path)
+        json.put("size", size)
+        json.put("mimeType", mimeType)
+        return json
+    }
+}
+
+
+data class CaptureErrorResult(val errorMessage: String) {
+    fun toJSObject(): JSObject {
+        val jsObject = JSObject()
+        jsObject.put("errorMessage", errorMessage)
+        return jsObject
+    }
 }

@@ -34,6 +34,8 @@ npx cap sync
 * [`saveFileToUserDevice(...)`](#savefiletouserdevice)
 * [`checkPermissions()`](#checkpermissions)
 * [`requestPermissions()`](#requestpermissions)
+* [`addListener('captureSuccessResult', ...)`](#addlistenercapturesuccessresult)
+* [`addListener('captureErrorResult', ...)`](#addlistenercaptureerrorresult)
 * [`addListener('captureVideoFinished', ...)`](#addlistenercapturevideofinished)
 * [`addListener('capturePhotoFinished', ...)`](#addlistenercapturephotofinished)
 * [`addListener('accelerometerOrientation', ...)`](#addlisteneraccelerometerorientation)
@@ -275,6 +277,38 @@ requestPermissions() => Promise<PermissionStatus>
 --------------------
 
 
+### addListener('captureSuccessResult', ...)
+
+```typescript
+addListener(eventName: 'captureSuccessResult', listenerFunc: (data: CaptureSuccessResult) => void) => Promise<PluginListenerHandle> & PluginListenerHandle
+```
+
+| Param              | Type                                                                                     |
+| ------------------ | ---------------------------------------------------------------------------------------- |
+| **`eventName`**    | <code>'captureSuccessResult'</code>                                                      |
+| **`listenerFunc`** | <code>(data: <a href="#capturesuccessresult">CaptureSuccessResult</a>) =&gt; void</code> |
+
+**Returns:** <code>Promise&lt;<a href="#pluginlistenerhandle">PluginListenerHandle</a>&gt; & <a href="#pluginlistenerhandle">PluginListenerHandle</a></code>
+
+--------------------
+
+
+### addListener('captureErrorResult', ...)
+
+```typescript
+addListener(eventName: 'captureErrorResult', listenerFunc: (data: CaptureErrorResult) => void) => Promise<PluginListenerHandle> & PluginListenerHandle
+```
+
+| Param              | Type                                                                                 |
+| ------------------ | ------------------------------------------------------------------------------------ |
+| **`eventName`**    | <code>'captureErrorResult'</code>                                                    |
+| **`listenerFunc`** | <code>(data: <a href="#captureerrorresult">CaptureErrorResult</a>) =&gt; void</code> |
+
+**Returns:** <code>Promise&lt;<a href="#pluginlistenerhandle">PluginListenerHandle</a>&gt; & <a href="#pluginlistenerhandle">PluginListenerHandle</a></code>
+
+--------------------
+
+
 ### addListener('captureVideoFinished', ...)
 
 ```typescript
@@ -351,6 +385,27 @@ removeAllListeners() => Promise<void>
 | Prop         | Type                                      |
 | ------------ | ----------------------------------------- |
 | **`remove`** | <code>() =&gt; Promise&lt;void&gt;</code> |
+
+
+#### CaptureSuccessResult
+
+Represents the result of a successful capture operation.
+
+| Prop           | Type                                     | Description                                                                    |
+| -------------- | ---------------------------------------- | ------------------------------------------------------------------------------ |
+| **`mimeType`** | <code>'image/jpeg' \| 'video/mp4'</code> | The MIME type of the captured media. Examples: "image/jpeg", "video/mp4".      |
+| **`name`**     | <code>string</code>                      | The name of the captured media file. Examples: "my-photo.jpg", "my-video.mp4". |
+| **`path`**     | <code>string</code>                      | The path to the captured media file. Example: "file://path-to-my-video.mp4".   |
+| **`size`**     | <code>number</code>                      | The size of the captured media file in bytes. Example: "7046447".              |
+
+
+#### CaptureErrorResult
+
+Represents the result of a failed capture operation.
+
+| Prop               | Type                | Description                                            |
+| ------------------ | ------------------- | ------------------------------------------------------ |
+| **`errorMessage`** | <code>string</code> | The error message describing the cause of the failure. |
 
 
 #### CaptureResult
