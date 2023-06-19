@@ -24,6 +24,7 @@ import androidx.camera.core.ImageCapture
 import com.getcapacitor.Bridge
 import com.getcapacitor.JSObject
 import com.getcapacitor.PluginCall
+import org.json.JSONObject
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
@@ -122,7 +123,7 @@ class PreviewCamera(private val bridge: Bridge) {
 
             }
 
-             showWebViewBackground()
+            showWebViewBackground()
 
             call.resolve()
         }
@@ -391,4 +392,30 @@ class PreviewCamera(private val bridge: Bridge) {
 
 fun Float.isBetween(a: Double, b: Double): Boolean {
     return a <= this && this <= b
+}
+
+
+data class CaptureSuccessResult(
+    val name: String,
+    val path: String,
+    val size: Long,
+    val mimeType: String
+) {
+    fun toJSObject(): JSObject {
+        val json = JSObject()
+        json.put("name", name)
+        json.put("path", path)
+        json.put("size", size)
+        json.put("mimeType", mimeType)
+        return json
+    }
+}
+
+
+data class CaptureErrorResult(val errorMessage: String) {
+    fun toJSObject(): JSObject {
+        val jsObject = JSObject()
+        jsObject.put("errorMessage", errorMessage)
+        return jsObject
+    }
 }
