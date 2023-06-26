@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.17 - 2023-06-26
+
+### Chore
+
+- Migrated to capacitor 5
+
 ## 0.0.16 - 2023-06-19
 
 ### Added
