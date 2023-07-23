@@ -1,0 +1,21 @@
+.camera-mode-switcher {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.center-photo-mode {
+  transform: translateX(32px);
+  transition: 0.3s ease-in-out;
+  -webkit-transition: 0.3s ease-in-out;
+}
+
+.center-video-mode {
+  transform: translateX(-32px);
+  transition: 0.3s ease-in-out;
+  -webkit-transition: 0.3s ease-in-out;
+}
+
+.unselected-chip {
+  --background: trasparent;
+}
