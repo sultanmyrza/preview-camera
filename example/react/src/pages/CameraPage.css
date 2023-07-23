@@ -1,0 +1,55 @@
+.camera-ion-header {
+  --background: transparent;
+}
+
+.camera-ion-toolbar {
+  padding-left: 16px;
+  padding-right: 16px;
+  --background: rgba(255, 255, 255, 0.4);
+}
+
+.camera-ion-content {
+  --background: transparent;
+}
+
+.camera-footer-container {
+  display: flex;
+  flex-direction: column;
+  background-color: rgba(255, 255, 255, 0.4);
+}
+
+.camera-footer-buttons {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  padding: 16px;
+}
+
+ion-icon.camera-footer-icon {
+  font-size: 28px;
+}
+
+ion-icon.camera-footer-icon-large {
+  font-size: 56px;
+}
+
+ion-icon.portraitUp {
+  transform: rotate(0);
+  transition: all 0.5s ease-out;
+}
+
+ion-icon.landscapeRight {
+  transform: rotate(-90deg);
+  transition: all 0.5s ease-out;
+}
+
+ion-icon.landscapeDown {
+  transform: rotate(180deg);
+  transition: all 0.5s ease-out;
+}
+
+ion-icon.landscapeLeft {
+  transform: rotate(90deg);
+  transition: all 0.5s ease-out;
+}

@@ -1,5 +1,14 @@
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/react';
-import ExploreContainer from '../components/ExploreContainer';
+import {
+  IonContent,
+  IonFab,
+  IonFabButton,
+  IonHeader,
+  IonIcon,
+  IonPage,
+  IonTitle,
+  IonToolbar,
+} from '@ionic/react';
+import { camera } from 'ionicons/icons';
 import './Home.css';
 
 const Home: React.FC = () => {
@@ -7,17 +16,21 @@ const Home: React.FC = () => {
     <IonPage>
       <IonHeader>
         <IonToolbar>
-          <IonTitle>Blank</IonTitle>
+          <IonTitle>Preview Camera</IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent fullscreen>
         <IonHeader collapse="condense">
           <IonToolbar>
-            <IonTitle size="large">Blank</IonTitle>
+            <IonTitle size="large">Preview Camera</IonTitle>
           </IonToolbar>
         </IonHeader>
-        <ExploreContainer />
       </IonContent>
+      <IonFab slot="fixed" horizontal="end" vertical="bottom">
+        <IonFabButton routerLink="/camera">
+          <IonIcon icon={camera}></IonIcon>
+        </IonFabButton>
+      </IonFab>
     </IonPage>
   );
 };
