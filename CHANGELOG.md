@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.18 - 2023-07-23
+
+### Fixed
+
+- iOS register removeAllListeners in CAP_PLUGIN Macro (#26)
+
 ## 0.0.17 - 2023-06-26
 
 ### Chore
