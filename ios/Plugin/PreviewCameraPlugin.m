@@ -24,4 +24,5 @@ CAP_PLUGIN(PreviewCameraPlugin, "PreviewCamera",
            CAP_PLUGIN_METHOD(saveFileToUserDevice, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(checkPermissions, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(requestPermissions, CAPPluginReturnPromise);
+           CAP_PLUGIN_METHOD(removeAllListeners, CAPPluginReturnPromise);
 )
