@@ -2,10 +2,18 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Allow our camera app to record videos with sound. This permission ensures a seamless capture of audio to enhance your video experience.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Capture great memories! Allow access to your camera to take stunning photos and record videos with ease.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Browse and share moments! Grant access to your photo library, so you can view and share your favorite pictures.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Seamlessly save photos! Enable access to add photos to your library, ensuring every special moment is safe and sound.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-        <string>react</string>
+	<string>react</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
