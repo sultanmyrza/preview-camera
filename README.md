@@ -5,8 +5,36 @@ Preview Camera Plugin for iOS, Android
 ## Install
 
 ```bash
-npm install @numbersprotocol/preview-camera
+npm install https://github.com/sultanmyrza/preview-camera.git
 npx cap sync
+```
+
+## iOS
+
+iOS requires the following usage description be added and filled out for your app in `Info.plist`:
+
+- `NSCameraUsageDescription` (`Privacy - Camera Usage Description`)
+- `NSPhotoLibraryAddUsageDescription` (`Privacy - Photo Library Additions Usage Description`)
+- `NSPhotoLibraryUsageDescription` (`Privacy - Photo Library Usage Description`)
+
+Read about [Configuring `Info.plist`](https://capacitorjs.com/docs/ios/configuration#configuring-infoplist) in the [iOS Guide](https://capacitorjs.com/docs/ios) for more information on setting iOS permissions in Xcode
+
+## Android
+
+This API requires the following permissions be added to your `AndroidManifest.xml`:
+
+```xml
+<uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
+<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+```
+
+You can also specify those permissions only for the Android versions where they will be requested:
+
+```xml
+<uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
+<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32"/>
+<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29"/>
 ```
 
 ## API
