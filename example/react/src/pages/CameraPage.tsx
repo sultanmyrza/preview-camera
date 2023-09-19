@@ -2,6 +2,9 @@ import {
   IonBackButton,
   IonButtons,
   IonContent,
+  IonFab,
+  IonFabButton,
+  IonFabList,
   IonFooter,
   IonHeader,
   IonIcon,
@@ -34,7 +37,7 @@ import './CameraPage.css';
 export type PreviewCameraMode = 'photo' | 'video';
 
 const CameraPage: React.FC = () => {
-  const [allPermissionsGranted, setAllPermissionsGranted] = useState(false);
+  const [allPermissionsGranted, setAllPermissionsGranted] = useState(true);
 
   const [cameraMode, setCameraMode] = useState<PreviewCameraMode>('photo');
 
@@ -45,6 +48,8 @@ const CameraPage: React.FC = () => {
   const [cameraOrientation, setCameraOrientaton] = useState<CustomOrientation>(
     'portraitUp',
   );
+
+  const [cameraQuality, setCameraQuality] = useState<'low' | 'hq'>('hq');
 
   const handleViewDidEnter = async () => {
     try {
@@ -127,7 +132,8 @@ const CameraPage: React.FC = () => {
 
   const handleCaptureSuccess = (data: CaptureSuccessResult) => {
     console.log('Capture Success:', data);
-    presentToast(`Capture Success: ${JSON.stringify(data.path)}`);
+    const sizeInMB = Math.round(data.size);
+    presentToast(`Capture Success: Size in bytes: ${sizeInMB}`);
   };
 
   const handleCaptureError = (data: CaptureErrorResult) => {
@@ -139,6 +145,15 @@ const CameraPage: React.FC = () => {
     orientation: CustomOrientation;
   }) => {
     setCameraOrientaton(data.orientation);
+  };
+
+  const handCameraQaulityChange = (quality: 'low' | 'hq') => {
+    try {
+      PreviewCamera.setQuality({ quality });
+      setCameraQuality(quality);
+    } catch (error: any) {
+      presentToast(JSON.stringify(error));
+    }
   };
 
   const [present] = useIonToast();
@@ -164,6 +179,20 @@ const CameraPage: React.FC = () => {
       {allPermissionsGranted ? (
         <>
           <IonContent fullscreen className="camera-ion-content" />
+
+          <IonFab slot="fixed" vertical="center" horizontal="end">
+            <IonFabButton>{cameraQuality}</IonFabButton>
+
+            <IonFabList side="top">
+              <IonFabButton onClick={() => handCameraQaulityChange('hq')}>
+                hq
+              </IonFabButton>
+              <IonFabButton onClick={() => handCameraQaulityChange('low')}>
+                low
+              </IonFabButton>
+            </IonFabList>
+          </IonFab>
+
           <IonFooter>
             <div className="camera-footer-container">
               <CameraModeSwitcher
